@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "feralfeed"
+version = "0.1.0"
+description = "A five-sprint project created in ITSC 3155, Software Engineering"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+flask = "^2.2.2"
+python = "~3.10"
+tensorflow = "^2.10.0"
+tensorflow-datasets = "^4.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
