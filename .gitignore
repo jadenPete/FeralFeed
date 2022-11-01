@@ -1,3 +1,4 @@
 /model/ignored_weights
 /poetry.lock
 __pycache__/
+venv
