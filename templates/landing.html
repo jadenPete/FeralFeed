@@ -1,3 +1,127 @@
 {% set title = "" %}
-
 {% extends "base.html" %}
+{% block body %}
+
+<div class="row">
+  <!-- Trending post -->
+  <div class="col">
+    <div class="card mt-3 m-2" style="width: 18rem;">
+      <div class="card-body">
+
+        <!-- Post 1 -->
+        <h5 class="card-title text-center">Trending Posts</h5>
+        <div class="class-body  rounded border border-dark mt-1">
+          <p>Say hello to this cutie</p>
+          <small>Post by: Example_User-1</small>
+        </div>
+
+        <!-- Post 2 -->
+        <div class="class-body   rounded border border-dark mt-2">
+          <p>Cats gone wild</p>
+          <small>Post by: Example_User-2</small>
+        </div>
+
+        <!-- Post 3 -->
+        <div class="class-body  rounded border border-dark mt-2">
+          <p>Purring on ya </p>
+          <small>Post by: Example_User-3</small>
+        </div>
+
+        <!-- Post 4 -->
+        <div class="class-body  rounded border border-dark mt-2">
+          <p>Throwing things of the table</p>
+          <small>Post by: Example_User-4</small>
+        </div>
+
+        <!-- Post 5 -->
+        <div class="class-body   rounded border border-dark mt-2">
+          <p>Ankle bitter at its finest</p>
+          <small>Post by: Example_User-5</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="col">
+
+    <!-- Content 1 -->
+    <div class="card  mt-3" style="width: 50rem;">
+      <div class="card-body">
+        <p class="card-text"><small class="">By: User_Example</small></p>
+        <h5 class="card-title">A CUTE CAT</h5>
+        <p class="card-text">This is not my cat, but i thought it looked cute.</p>
+      </div>
+      <img
+        src="https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-superJumbo.jpg?quality=75&auto=webp"
+        class="card-img-bottom" alt="">
+
+      <!-- Like, Dislike, and commnet -->
+      <div class="card-body">
+        <button class="btn btn-block"><i class="fa fa-angle-double-up"></i> </button>
+        <p class="d-inline">100</p>
+        <button class="btn btn-block "><i class="fa fa-angle-double-down "></i> </button>
+        <button class="btn btn-block"><i class="fa fa-commenting-o" aria-hidden="true"> Comment</i> </button>
+      </div>
+    </div>
+
+    <!-- Content 2 -->
+    <div class="card mt-3" style="width: 50rem;">
+      <div class="card-body">
+        <p class="card-text"><small class="">By: User_Example</small></p>
+        <h5 class="card-title">A CUTE CAT</h5>
+        <p class="card-text">This is not my cat, but i thought it looked cute.</p>
+      </div>
+      <img
+        src="https://static.scientificamerican.com/sciam/cache/file/32665E6F-8D90-4567-9769D59E11DB7F26_source.jpg?w=590&h=800&7E4B4CAD-CAE1-4726-93D6A160C2B068B2"
+        class="card-img-bottom" alt="">
+
+      <!-- Like, Dislike, and commnet -->
+      <div class="card-body">
+        <button class="btn btn-block"><i class="fa fa-angle-double-up"> </i> </button>
+        <p class="d-inline">100</p>
+        <button class="btn btn-block"><i class="fa fa-angle-double-down"></i> </button>
+        <button class="btn btn-block"><i class="fa fa-commenting-o" aria-hidden="true"> Comment</i> </button>
+      </div>
+    </div>
+
+    <!-- Content 3 -->
+    <div class="card mt-3" style="width: 50rem;">
+      <div class="card-body">
+        <p class="card-text"><small class="">By: User_Example</small></p>
+        <h5 class="card-title">A CUTE CAT</h5>
+        <p class="card-text">This is not my cat, but i thought it looked cute.</p>
+      </div>
+      <img src="https://www.history.com/.image/t_share/MTg0NTEzNzgyNTMyNDE2OTk5/black-cat-gettyimages-901574784.jpg"
+        class="card-img-bottom" alt="">
+
+      <!-- Like, Dislike, and commnet -->
+      <div class="card-body">
+        <button class="btn btn-block"><i class="fa fa-angle-double-up"></i> </button>
+        <p class="d-inline">100</p>
+        <button class="btn btn-block "><i class="fa fa-angle-double-down "></i> </button>
+        <button class="btn btn-block"><i class="fa fa-commenting-o" aria-hidden="true"> Comment</i> </button>
+      </div>
+    </div>
+
+
+  </div>
+
+
+  <!-- Register -->
+  <div class="col">
+    <div class="card mt-3" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title text-center">Register With US</h5>
+        <p class="card-text text-center">By registering with us you will be able to post, edit, and get personalized
+          content <br> Click the button below</p>
+        <div style="padding-left: 70px;">
+          <a href="#" class="btn btn-primary">Register Now</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
