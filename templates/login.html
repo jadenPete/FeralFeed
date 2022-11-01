@@ -1,4 +1,4 @@
-{% set title = "Sign In | FeralFeed" %}
+{% set title = "Sign In" %}
 
 {% extends "base.html" %}
 {%block body%}
@@ -7,8 +7,8 @@
     <!-- Login form -->
     <form action="/login" method="post">
         <div class="container mt-3">
-            <label for="email" class="form-label">Email Address</label>
-            <input type="email" name="email" id="email" placeholder="Enter your email" class="form-control" autocomplete="off" required>
+            <label for="username" class="form-label">Username</label>
+            <input type="username" name="username" id="username" placeholder="Enter your username" class="form-control" autocomplete="off" required>
         </div>
         <div class="container mt-3">
             <label for="password" class="form-label">Enter password</label>
