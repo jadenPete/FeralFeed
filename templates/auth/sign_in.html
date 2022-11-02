@@ -1,0 +1,41 @@
+{% set title = "Sign In" %}
+
+{% extends "base.html" %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/sign_in_up.css') }}">
+
+	<script defer src="{{ url_for('static', filename='js/auth/sign_in.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+	<div class="d-flex align-items-center justify-content-center flex-grow-1">
+		<form class="form border col-3 p-4 rounded">
+			<div class="form-floating mb-3">
+				<input type="text"
+					id="username-input"
+					class="form-control"
+					name="username"
+					placeholder="Your username"
+					required>
+
+				<label for="username-input">Username</label>
+			</div>
+
+			<div class="form-floating mb-4">
+				<input type="password"
+					id="password-input"
+					class="form-control"
+					name="password"
+					placeholder="Your password"
+					required>
+
+				<label for="password-input">Password</label>
+			</div>
+
+			<span class="error d-none mb-3 text-danger">Username or password incorrect.</span>
+
+			<button class="btn btn-primary">Submit</button>
+		</form>
+	</div>
+{% endblock %}

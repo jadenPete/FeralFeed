@@ -7,11 +7,14 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
+argon2-cffi = "^21.3.0"
 flask = "^2.2.2"
+psycopg2 = "^2.9.5"
 python = "~3.10"
 tensorflow = "^2.10.0"
-tensorflow-datasets = "^4.7.0"
 
+[tool.poetry.group.dev.dependencies]
+tensorflow-datasets = "^4.7.0"
 
 [build-system]
 requires = ["poetry-core"]
