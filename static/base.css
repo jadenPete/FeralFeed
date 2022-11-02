@@ -1,3 +1,22 @@
 .header {
 	background-color: #ffda6a;
 }
+
+.row {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+.title{
+	text-align: center;
+}
+
+.message{
+		padding-left: 50px;
+		padding-right: 50px;
+}
+
+.button{
+		align-items: center;
+			
+}
