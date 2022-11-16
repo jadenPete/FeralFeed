@@ -55,15 +55,23 @@ def get_user():
 	return flask.g.user
 
 @app.context_processor
+def inject_debug():
+	return {
+		"debug": app.debug
+	}
+
+@app.context_processor
 def inject_user():
-	return {"user": get_user()}
+	return {
+		"user": get_user()
+	}
 
 @app.route("/")
 def index():
 	if get_user() is None:
 		return flask.render_template("landing.html")
 
-	return flask.render_template("feed.html")
+	return flask.render_template("feed.html", posts=get_db().posts())
 
 @app.route("/about")
 def about():
@@ -72,6 +80,20 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
+
+@app.route("/image")
+def image():
+	try:
+		image_id = int(flask.request.args["id"])
+	except (KeyError, ValueError):
+		return "Please include an integer id query parameter.", 400
+
+	if (image_content_type := get_db().image(image_id)) is None:
+		return "An image with the given ID doesn't exist.", 404
+
+	return image_content_type[0], 200, {
+		"Content-Type": image_content_type[1]
+	}
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():
