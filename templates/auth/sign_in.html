@@ -9,8 +9,9 @@
 {% endblock %}
 
 {% block body %}
-	<div class="d-flex align-items-center justify-content-center flex-grow-1">
-		<form class="form border col-3 p-4 rounded">
+<div class="d-flex align-items-center justify-content-center flex-grow-1">
+	<form class="form border col-3 p-4 rounded">
+			<h1>Sign In</h1>
 			<div class="form-floating mb-3">
 				<input type="text"
 					id="username-input"
@@ -28,7 +29,8 @@
 					class="form-control"
 					name="password"
 					placeholder="Your password"
-					required>
+					required
+					autocomplete="off">
 
 				<label for="password-input">Password</label>
 			</div>
