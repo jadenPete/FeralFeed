@@ -6,12 +6,11 @@ import psycopg2
 import uuid
 
 class DatabasePostTag(enum.Enum):
-	"Grey" = 0
-	"Black" = 1
-	"White" = 2
-	"Baby" = 3
-	"Big" = 4
-
+	GREY = "grey"
+	BLACK = "black"
+	WHITE = "white"
+	BABY = "baby"
+	BIG = "big"
 
 class Database:
 	def __init__(self, app_config):
@@ -64,12 +63,19 @@ CREATE TABLE IF NOT EXISTS posts (
 );"""
 		)
 
+		try:
+			self.cur.execute(
+				"CREATE TYPE post_tag AS ENUM ('grey', 'black', 'white', 'baby', 'big');"
+			)
+		except psycopg2.errors.DuplicateObject:
+			pass
+
 		self.cur.execute(
 			"""
 CREATE TABLE IF NOT EXISTS post_tags (
 	post_id INTEGER NOT NULL REFERENCES posts,
-	tag INTEGER NOT NULL,
-	PRIMARY KEY (post_id, tag_id)
+	tag post_tag NOT NULL,
+	PRIMARY KEY (post_id, tag)
 );"""
 		)
 
@@ -132,24 +138,30 @@ class DatabasePost:
 		self.db = db
 		self.id = id_
 
-	def serialize():
+	def serialize(self):
 		self.db.cur.execute(
 			"""
-SELECT username, title, body, image_id, confidence, catnip, timestamp
-	FROM posts WHERE id = %s
-	JOIN users WHERE user_id = users.id
-	JOIN images WHERE image_id = images.id;""", (self.id,)
+SELECT username, title, body, confidence, catnip, timestamp, image_id
+	FROM posts
+	JOIN users ON user_id = users.id
+	JOIN images ON image_id = images.id
+	WHERE posts.id = %s;""", (self.id,)
 		)
 
-		row = self.db.cur.fetchone()
+		post_row = self.db.cur.fetchone()
+
+		self.db.cur.execute("SELECT tag FROM post_tags WHERE post_id = %s;", (self.id,))
+
+		tag_rows = self.db.cur.fetchall()
 
 		return {
-			"username": row[0],
-			"title": row[1],
-			"body": row[2],
-			"image_url": flask.url_for("image", id=row[3]),
-			"catnip": row[4] * row[5],
-			"timestamp": row[6]
+			"username": post_row[0],
+			"title": post_row[1],
+			"body": post_row[2],
+			"tags": [row[0] for row in tag_rows],
+			"catnip": round(post_row[3] * post_row[4]),
+			"timestamp": post_row[5],
+			"image_url": flask.url_for("image", id=post_row[6]),
 		}
 
 class DatabaseUser:

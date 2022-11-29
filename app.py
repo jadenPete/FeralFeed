@@ -71,7 +71,7 @@ def index():
 	if get_user() is None:
 		return flask.render_template("landing.html")
 
-	return flask.render_template("feed.html", posts=get_db().posts())
+	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
 
 @app.route("/about")
 def about():
