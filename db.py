@@ -1,7 +1,16 @@
 import argon2
 import datetime
+import enum
+import flask
 import psycopg2
 import uuid
+
+class DatabasePostTag(enum.Enum):
+	GREY = "grey"
+	BLACK = "black"
+	WHITE = "white"
+	BABY = "baby"
+	BIG = "big"
 
 class Database:
 	def __init__(self, app_config):
@@ -36,7 +45,8 @@ CREATE TABLE IF NOT EXISTS tokens (
 CREATE TABLE IF NOT EXISTS images (
 	id SERIAL PRIMARY KEY,
 	content BYTEA NOT NULL,
-	confidence REAL NOT NULL CHECK(confidence BETWEEN 0 AND 1)
+	content_type TEXT NOT NULL,
+	confidence REAL NOT NULL CHECK (confidence BETWEEN 0 AND 1)
 );"""
 		)
 
@@ -53,16 +63,21 @@ CREATE TABLE IF NOT EXISTS posts (
 );"""
 		)
 
-	def create_Comment(self, user_Id, title, body, image_Id, catnip, timestamp):
 
+		try:
+			self.cur.execute(
+				"CREATE TYPE post_tag AS ENUM ('grey', 'black', 'white', 'baby', 'big');"
+			)
+		except psycopg2.errors.DuplicateObject:
+			pass
 
-		
 		self.cur.execute(
-			"INSERT INTO posts (user_Id, title, body, image_Id, catnip, timestamp) VALUES (%s, %s, %s,%s,%s,%s) RETURNING id;",
-
-			(user_Id, title, body, image_Id, catnip, timestamp)
-
-
+			"""
+CREATE TABLE IF NOT EXISTS post_tags (
+	post_id INTEGER NOT NULL REFERENCES posts,
+	tag post_tag NOT NULL,
+	PRIMARY KEY (post_id, tag)
+);"""
 		)
 
 		self.cur.execute(
@@ -92,6 +107,19 @@ CREATE TABLE IF NOT EXISTS comments (
 		except psycopg2.errors.UniqueViolation:
 			pass
 
+	def image(self, id_):
+		self.cur.execute("SELECT content, content_type FROM images WHERE id = %s;", (id_,))
+
+		if self.cur.rowcount > 0:
+			row = self.cur.fetchone()
+
+			return bytes(row[0]), row[1]
+
+	def posts(self):
+		self.cur.execute("SELECT id FROM posts ORDER BY timestamp DESC;")
+
+		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
+
 	def user_with_username(self, username):
 		self.cur.execute("SELECT id FROM users WHERE username = %s;", (username,))
 
@@ -105,6 +133,37 @@ CREATE TABLE IF NOT EXISTS comments (
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
+
+class DatabasePost:
+	def __init__(self, db, id_):
+		self.db = db
+		self.id = id_
+
+	def serialize(self):
+		self.db.cur.execute(
+			"""
+SELECT username, title, body, confidence, catnip, timestamp, image_id
+	FROM posts
+	JOIN users ON user_id = users.id
+	JOIN images ON image_id = images.id
+	WHERE posts.id = %s;""", (self.id,)
+		)
+
+		post_row = self.db.cur.fetchone()
+
+		self.db.cur.execute("SELECT tag FROM post_tags WHERE post_id = %s;", (self.id,))
+
+		tag_rows = self.db.cur.fetchall()
+
+		return {
+			"username": post_row[0],
+			"title": post_row[1],
+			"body": post_row[2],
+			"tags": [row[0] for row in tag_rows],
+			"catnip": round(post_row[3] * post_row[4]),
+			"timestamp": post_row[5],
+			"image_url": flask.url_for("image", id=post_row[6]),
+		}
 
 class DatabaseUser:
 	def __init__(self, db, id_):

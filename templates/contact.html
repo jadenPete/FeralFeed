@@ -6,22 +6,24 @@
 <h1 class="title">We are here to help!</h1>
 <br>
 <p class="title">Please send your message below. We will get back to you at the earliest.</p>
-<form id="contact_form" name="contact_form" method="post" action="">
+
+<form action="https://formsubmit.co/infoferalfeed@gmail.com" id="contact_form" name="contact_form" method="post">
     <div class="row">
         <div class="col">
+            <input type="hidden" name="_next" value="https://feralfeed.com/templates/thankyou.html">
             <label>First Name</label>
-            <input type="text" required maxlength="50" class="form-control" id="first_name" name="first_name" placeholder="First Name">
+            <input type="text" required maxlength="50" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
         </div>
         <div class="col">
             <label>Last Name</label>
-            <input type="text" required maxlength="50" class="form-control" id="last_name" name="last_name" placeholder="Last Name">
+            <input type="text" required maxlength="50" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
         </div>
     </div>
     <div class="row">
         <div class="col">
             <label for="email">Email address</label>
             <input type="email" required maxlength="50" class="form-control" id="email" name="email"
-                placeholder="name@example.com">
+                placeholder="name@example.com" required>
 
 
         </div>
@@ -35,7 +37,7 @@
 
     <div class="message">
         <label for="message">Message</label>
-        <textarea class="form-control" id="message" name="message" rows="5" placeholder="Type your message here."></textarea>
+        <textarea class="form-control" id="message" name="message" rows="5" placeholder="Type your message here." required></textarea>
     
     <br>
     <button type="submit" class="btn btn-primary px-5 btn-lg align-content-center justify-content-center">Submit</button>
