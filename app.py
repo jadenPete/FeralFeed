@@ -8,7 +8,10 @@ import db
 class CookieNames:
 	TOKEN = "token"
 
+
+
 app = flask.Flask(__name__)
+app.config['SECRET_KEY'] = 'super secret key'
 
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +41,7 @@ def authenticated(fn):
 def close_db(_):
 	if "db" in flask.g:
 		flask.g.db.__exit__()
+
 
 def get_db():
 	if "db" not in flask.g:
@@ -80,6 +84,7 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
+
 
 @app.route("/image")
 def image():
@@ -141,3 +146,28 @@ def sign_up():
 	response.set_cookie(CookieNames.TOKEN, user.create_token())
 
 	return response
+
+
+@app.post("/create_post")
+def create_post():
+	title = flask.request.form.get("title", type=str)
+	description = flask.request.form.get("description", type=str)
+	picture = flask.request.form.get("picture")
+
+	user_id = get_user().id
+	
+
+	
+
+	if not title:
+		flask.flash("Title is required", category='error')
+	elif not picture:
+		flask.flash("Picture is required", category='error')
+	else:
+		flask.flash("Post Successfully Created", category='success')
+
+		db.Database().create_Comment(user_id, title, description)
+		
+
+	
+	return flask.redirect(flask.url_for("index"))

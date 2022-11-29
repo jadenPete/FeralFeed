@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS posts (
 );"""
 		)
 
+
 		try:
 			self.cur.execute(
 				"CREATE TYPE post_tag AS ENUM ('grey', 'black', 'white', 'baby', 'big');"
