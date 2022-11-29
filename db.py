@@ -53,6 +53,18 @@ CREATE TABLE IF NOT EXISTS posts (
 );"""
 		)
 
+	def create_Comment(self, user_Id, title, body, image_Id, catnip, timestamp):
+
+
+		
+		self.cur.execute(
+			"INSERT INTO posts (user_Id, title, body, image_Id, catnip, timestamp) VALUES (%s, %s, %s,%s,%s,%s) RETURNING id;",
+
+			(user_Id, title, body, image_Id, catnip, timestamp)
+
+
+		)
+
 		self.cur.execute(
 			"""
 CREATE TABLE IF NOT EXISTS comments (
