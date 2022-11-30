@@ -1,6 +1,29 @@
 {% set title = "User Settings" %}
 {% extends "base.html" %}
 {%block body%}
-        <h1>Settings Page</h1>
+        <h1 class="text-center">Settings Page</h1>
+        <div class="container w-50">
+            <div class="card-body align-items-center">
+              <hr class="border-light m-0">
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <input type="text" class="form-control mb-1" value="placeholder" disabled>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Old Password</label>
+                  <input type="password" class="form-control" placeholder="Enter your old password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input type="password" class="form-control" placeholder="Enter a new password">
+                  </div>
+              </div>
+              <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <a href="{{ url_for('index') }}"><button type="button"  class="btn btn-default">Cancel</button></a>
+              </div>
+
+        </div>
 {%endblock%}
 
