@@ -94,6 +94,25 @@ CREATE TABLE IF NOT EXISTS comments (
 	def __exit__(self):
 		self.cur.close()
 		self.conn.close()
+	
+	def create_post(self, user_id, title, body, image_content, image_content_type):
+		self.cur.execute(
+			"""
+			INSERT INTO images 
+				(content, content_type, confidence)  
+				VALUES (%s, %s, 1) RETURNING id; 
+				""", (image_content, image_content_type))
+
+
+		self.cur.execute(
+			"""
+		INSERT INTO posts 
+			(user_id, title, body, image_id, catnip, timestamp) 
+			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
+			""" , (user_id, title, body, self.cur.fetchone()[0])) 
+
+
+		return DatabasePost(self, self.cur.fetchone()[0])
 
 	def create_user(self, username, password):
 		try:
@@ -138,6 +157,9 @@ class DatabasePost:
 	def __init__(self, db, id_):
 		self.db = db
 		self.id = id_
+
+
+	
 
 	def serialize(self):
 		self.db.cur.execute(
