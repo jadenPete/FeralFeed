@@ -167,8 +167,6 @@ def create_post():
 	else:
 		flask.flash("Post Successfully Created", category='success')
 
-		
-		# 
-		# get_db().create_post(user_id,title,description, , "png")		
+	get_db().create_post(user_id,title,description, picture , "image/png")		
 
 	return flask.redirect(flask.url_for("index"))
