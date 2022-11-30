@@ -158,6 +158,8 @@ def create_post():
 	picture = flask.request.form.get("picture")
 	user_id = get_user().id
 
+
+	
 	if not title:
 		flask.flash("Title is required", category='error')
 	elif not picture:
@@ -165,6 +167,8 @@ def create_post():
 	else:
 		flask.flash("Post Successfully Created", category='success')
 
-	#db.Database().create_Comment(user_id, title, description)
-	
+		
+		# 
+		# get_db().create_post(user_id,title,description, , "png")		
+
 	return flask.redirect(flask.url_for("index"))
