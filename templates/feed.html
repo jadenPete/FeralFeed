@@ -7,8 +7,6 @@
 	<script defer src="{{ url_for('static', filename='js/feed.js') }}"></script>
 {% endblock %}
 
-
-
 {% block body %}
 	<div class="d-flex justify-content-center p-3">
 		<div class="col-xxl-10 d-flex justify-content-between">
@@ -68,32 +66,33 @@
 						<input type="checkbox" class="btn-check" id="greyCats" autocomplete="off" />
 						<label class="btn btn-outline-secondary btn-sm" for="greyCats">Grey Cats</label>
 						
-						<input type="checkbox" class="btn-check" id="blackCats" checked autocomplete="off" />
+						<input type="checkbox" class="btn-check" id="blackCats" autocomplete="off" />
 						<label class="btn btn-outline-dark btn-sm" for="blackCats">Black Cats</label>
 						
 						<input type="checkbox" class="btn-check" id="whiteCats" autocomplete="off" />
 						<label class="btn btn-outline-warning btn-sm" for="whiteCats">White Cats</label>
 
-						<input type="checkbox" class="btn-check" id="babyCats" checked autocomplete="off" />
+						<input type="checkbox" class="btn-check" id="babyCats" autocomplete="off" />
 						<label class="btn btn-outline-danger btn-sm" for="babyCats">Baby Cats</label>
 						
 						<input type="checkbox" class="btn-check" id="bigCats" autocomplete="off" />
 						<label class="btn btn-outline-info btn-sm" for="bigCats">Big Cats</label>				
 
 						
-						<form class="card-text" id="userPost" action="/create_post" method="POST">
+						<form class="card-text" id="userPost" action="/create_post" method="post">
 							<label class="mb-2" for="title">Title</label>
-    						<input type="text" class="form-control" id="title" name="title"placeholder="Enter Title">
+    						<input type="text" class="form-control" id="title" placeholder="Enter Title">
 							<div class="form-group">
 								<label class="mt-3 mb-2" for="description">Description</label>
-								<textarea class="form-control" id="description"  name="description" rows="3"></textarea>
+								<textarea class="form-control" id="description" rows="3"></textarea>
 							</div>
 							<label class="mt-3 mb-2" for="picture">Cat Picture</label>
 							<div class="form-group">
-								<input type="file" accept=".png" class="form-control-file" id="picture" name="picture" >
-
+								<input type="file" accept=".png" class="form-control" id="picture" >
 							</div>
 						</form>
+
+
 
 					</div>
 					<input type="submit" form="userPost" class="btn btn-primary rounded-0 rounded-bottom"/>

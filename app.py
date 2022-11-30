@@ -85,6 +85,9 @@ def about():
 def contact():
 	return flask.render_template("contact.html")
 
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html")
 
 @app.route("/image")
 def image():
@@ -163,9 +166,9 @@ def create_post():
 		flask.flash("Picture is required", category='error')
 	else:
 		flask.flash("Post Successfully Created", category='success')
+
 		
 		# 
-		# get_db().create_post(user_id,title,description, , "png")
-		
+		# get_db().create_post(user_id,title,description, , "png")		
 
 	return flask.redirect(flask.url_for("index"))
