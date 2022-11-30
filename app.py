@@ -156,11 +156,7 @@ def create_post():
 	title = flask.request.form.get("title", type=str)
 	description = flask.request.form.get("description", type=str)
 	picture = flask.request.form.get("picture")
-
 	user_id = get_user().id
-	
-
-	
 
 	if not title:
 		flask.flash("Title is required", category='error')
@@ -169,8 +165,6 @@ def create_post():
 	else:
 		flask.flash("Post Successfully Created", category='success')
 
-		db.Database().create_Comment(user_id, title, description)
-		
-
+	#db.Database().create_Comment(user_id, title, description)
 	
 	return flask.redirect(flask.url_for("index"))

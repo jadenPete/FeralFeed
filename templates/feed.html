@@ -79,7 +79,7 @@
 						<label class="btn btn-outline-info btn-sm" for="bigCats">Big Cats</label>				
 
 						
-						<form class="card-text" id="userPost">
+						<form class="card-text" id="userPost" action="/create_post" method="post">
 							<label class="mb-2" for="title">Title</label>
     						<input type="text" class="form-control" id="title" placeholder="Enter Title">
 							<div class="form-group">
@@ -91,6 +91,8 @@
 								<input type="file" accept=".png" class="form-control" id="picture" >
 							</div>
 						</form>
+
+
 
 					</div>
 					<input type="submit" form="userPost" class="btn btn-primary rounded-0 rounded-bottom"/>
