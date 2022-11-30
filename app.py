@@ -157,6 +157,7 @@ def create_post():
 	description = flask.request.form.get("description", type=str)
 	picture = flask.request.form.get("picture")
 	user_id = get_user().id
+	
 
 
 	
