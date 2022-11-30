@@ -87,7 +87,7 @@ def contact():
 
 @app.get("/settings")
 def settings():
-	return flask.render_template("settings.html")
+	return flask.render_template("settings.html",user_data=get_user().serialize())
 
 @app.route("/image")
 def image():

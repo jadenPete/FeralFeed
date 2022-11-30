@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS comments (
 
 class DatabasePost:
 	def __init__(self, db, id_):
-		self.db = db
+		self.db:Database= db
 		self.id = id_
 
 	def serialize(self):
@@ -167,8 +167,18 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 
 class DatabaseUser:
 	def __init__(self, db, id_):
-		self.db = db
+		self.db:Database = db
 		self.id = id_
+
+	def serialize(self):
+		self.db.cur.execute(
+			f"""
+SELECT username FROM users WHERE id = {self.id};
+			"""
+		)
+		return {
+			"username" : self.db.cur.fetchone()[0]
+		}
 
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
@@ -189,6 +199,12 @@ INSERT INTO tokens
 		)
 
 		return token
+	
+	def get_username(self):
+		print(self.id)
+		self.db.cur.execute(f'SELECT username FROM users WHERE id = {self.id}')
+		if (self.db.cur.rowcount > 0):
+			return self.db.cur.fetchone()[0]
 
 	def verify_password(self, password):
 		self.db.cur.execute("SELECT password FROM users WHERE id = %s;", (self.id,))
