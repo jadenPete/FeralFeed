@@ -85,6 +85,9 @@ def about():
 def contact():
 	return flask.render_template("contact.html")
 
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html")
 
 @app.route("/image")
 def image():
