@@ -1,6 +1,5 @@
 /model/ignored_weights/
 /venv/
 __pycache__/
-/config_private.json
 /poetry.lock
 .DS_Store

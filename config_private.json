@@ -1,0 +1,3 @@
+{
+    "psycopg2_dsn": "dbname=feralfeed user=postgres password=bishal"
+}
