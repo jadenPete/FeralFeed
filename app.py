@@ -85,6 +85,9 @@ def about():
 def contact():
 	return flask.render_template("contact.html")
 
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html",user_data=get_user().serialize())
 
 @app.route("/image")
 def image():
@@ -164,5 +167,6 @@ def create_post():
 		flask.flash("Post Successfully Created", category='success')
 		get_db().create_post(user_id,title,description, picture, "image/png")
 		
+
 
 	return flask.redirect(flask.url_for("index"))
