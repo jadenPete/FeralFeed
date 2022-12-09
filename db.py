@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS comments (
 		self.conn.close()
 	
 	def create_post(self, user_id, title, body, image_content, image_content_type):
+
 		self.cur.execute(
 			"""
 			INSERT INTO images 
@@ -113,6 +114,11 @@ CREATE TABLE IF NOT EXISTS comments (
 
 
 		return DatabasePost(self, self.cur.fetchone()[0])
+	def create_postTags(self, post_id, tag):
+		pass
+
+
+
 
 	def create_user(self, username, password):
 		try:
