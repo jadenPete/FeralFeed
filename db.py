@@ -94,31 +94,28 @@ CREATE TABLE IF NOT EXISTS comments (
 	def __exit__(self):
 		self.cur.close()
 		self.conn.close()
-	
-	def create_post(self, user_id, title, body, image_content, image_content_type):
+
+	def create_post(self, user_id, title, body, image_content, image_content_type, tags):
+		self.cur.execute(
+			"""
+INSERT INTO images (content, content_type, confidence)
+	VALUES (%s, %s, 1)
+	RETURNING id;""", (image_content, image_content_type)
+		)
 
 		self.cur.execute(
 			"""
-			INSERT INTO images 
-				(content, content_type, confidence)  
-				VALUES (%s, %s, 1) RETURNING id; 
-				""", (image_content, image_content_type))
+INSERT INTO posts (user_id, title, body, image_id, catnip, timestamp)
+	VALUES (%s, %s, %s, %s, 0 , NOW())
+	RETURNING id;""", (user_id, title, body, self.cur.fetchone()[0])
+		)
 
+		post_id = self.cur.fetchone()[0]
 
-		self.cur.execute(
-			"""
-		INSERT INTO posts 
-			(user_id, title, body, image_id, catnip, timestamp) 
-			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
-			""" , (user_id, title, body, self.cur.fetchone()[0])) 
+		for tag in tags:
+			self.cur.execute("INSERT INTO post_tags VALUES (%s, %s);", (post_id, tag.value))
 
-
-		return DatabasePost(self, self.cur.fetchone()[0])
-	def create_postTags(self, post_id, tag):
-		pass
-
-
-
+		return DatabasePost(self, post_id)
 
 	def create_user(self, username, password):
 		try:
@@ -131,8 +128,6 @@ CREATE TABLE IF NOT EXISTS comments (
 			return DatabaseUser(self, self.cur.fetchone()[0])
 		except psycopg2.errors.UniqueViolation:
 			pass
-	
-		
 
 	def image(self, id_):
 		self.cur.execute("SELECT content, content_type FROM images WHERE id = %s;", (id_,))
@@ -163,11 +158,8 @@ CREATE TABLE IF NOT EXISTS comments (
 
 class DatabasePost:
 	def __init__(self, db, id_):
-		self.db:Database= db
+		self.db: Database = db
 		self.id = id_
-
-
-	
 
 	def serialize(self):
 		self.db.cur.execute(
@@ -200,16 +192,6 @@ class DatabaseUser:
 		self.db:Database = db
 		self.id = id_
 
-	def serialize(self):
-		self.db.cur.execute(
-			f"""
-SELECT username FROM users WHERE id = {self.id};
-			"""
-		)
-		return {
-			"username" : self.db.cur.fetchone()[0]
-		}
-
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
 
@@ -224,17 +206,22 @@ INSERT INTO tokens
 	VALUES (%s, %s, NOW() + %s)
 	ON CONFLICT (user_id)
 		DO UPDATE SET uuid = EXCLUDED.uuid, expiration = EXCLUDED.expiration;""",
-
 			(token, self.id, ttl)
 		)
 
 		return token
-	
-	def get_username(self):
-		# print(self.id)
-		self.db.cur.execute(f'SELECT username FROM users WHERE id = {self.id}')
-		if (self.db.cur.rowcount > 0):
-			return self.db.cur.fetchone()[0]
+
+	def serialize(self):
+		self.db.cur.execute("SELECT username FROM users WHERE id = %s", (self.id,))
+
+		return {
+			"username" : self.db.cur.fetchone()[0]
+		}
+
+	def update_password(self, password):
+		self.db.cur.execute(
+			"UPDATE users SET password = %s WHERE id = %s", (self.db.ph.hash(password), self.id_)
+		)
 
 	def verify_password(self, password):
 		self.db.cur.execute("SELECT password FROM users WHERE id = %s;", (self.id,))
@@ -245,13 +232,3 @@ INSERT INTO tokens
 			return self.create_token()
 		except argon2.exceptions.VerifyMismatchError:
 			pass
-
-	def update_password(self, username, password):
-		try:
-			self.db.cur.execute(
-				f"UPDATE users SET password='{self.db.ph.hash(password)}' WHERE username='{username}'"
-			)
-			return True
-		except Exception as e:
-			print(e)
-			return False
