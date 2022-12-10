@@ -12,6 +12,7 @@ flask = "^2.2.2"
 psycopg2 = "^2.9.5"
 python = "~3.10.0"
 tensorflow = "^2.10.0"
+pillow = "^9.3.0"
 
 [tool.poetry.group.dev.dependencies]
 tensorflow-datasets = "^4.7.0"

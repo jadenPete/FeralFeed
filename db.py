@@ -95,12 +95,12 @@ CREATE TABLE IF NOT EXISTS comments (
 		self.cur.close()
 		self.conn.close()
 
-	def create_post(self, user_id, title, body, image_content, image_content_type, tags):
+	def create_post(self, user_id, title, body, image_content, image_content_type, tags, confidence):
 		self.cur.execute(
 			"""
 INSERT INTO images (content, content_type, confidence)
-	VALUES (%s, %s, 1)
-	RETURNING id;""", (image_content, image_content_type)
+	VALUES (%s, %s, %s)
+	RETURNING id;""", (image_content, image_content_type, confidence)
 		)
 
 		self.cur.execute(
