@@ -1,9 +1,20 @@
 import flask
 import functools
+import io
 import json
+import numpy as np
 import os
+from PIL import Image
 
 import db
+
+# We were having some issues with Tensorflow on M1; we won't load the model on that platform
+try:
+	import model.predict
+
+	model_loaded = True
+except ModuleNotFoundError:
+	model_loaded = False
 
 class CookieNames:
 	TOKEN = "token"
@@ -139,7 +150,22 @@ def create_post():
 			if flask.request.form.get(f"{tag.value}-tag") == "on":
 				tags.append(tag)
 
-		get_db().create_post(get_user().id, title, description, picture, picture_mimetype, tags)
+		if model_loaded:
+			picture_np = np.array(Image.open(io.BytesIO(picture)))
+
+			confidence = model.predict.predict(picture_np)
+		else:
+			confidence = 1
+
+		get_db().create_post(
+			get_user().id,
+			title,
+			description,
+			picture,
+			picture_mimetype,
+			tags,
+			confidence
+		)
 
 	return flask.redirect(flask.url_for("index"))
 
