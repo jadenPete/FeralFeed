@@ -131,6 +131,8 @@ CREATE TABLE IF NOT EXISTS comments (
 			return DatabaseUser(self, self.cur.fetchone()[0])
 		except psycopg2.errors.UniqueViolation:
 			pass
+	
+		
 
 	def image(self, id_):
 		self.cur.execute("SELECT content, content_type FROM images WHERE id = %s;", (id_,))
@@ -229,7 +231,7 @@ INSERT INTO tokens
 		return token
 	
 	def get_username(self):
-		print(self.id)
+		# print(self.id)
 		self.db.cur.execute(f'SELECT username FROM users WHERE id = {self.id}')
 		if (self.db.cur.rowcount > 0):
 			return self.db.cur.fetchone()[0]
@@ -243,3 +245,13 @@ INSERT INTO tokens
 			return self.create_token()
 		except argon2.exceptions.VerifyMismatchError:
 			pass
+
+	def update_password(self, username, password):
+		try:
+			self.db.cur.execute(
+				f"UPDATE users SET password='{self.db.ph.hash(password)}' WHERE username='{username}'"
+			)
+			return True
+		except Exception as e:
+			print(e)
+			return False

@@ -150,6 +150,18 @@ def sign_up():
 
 	return response
 
+@app.post('/change_password')
+def change_password():
+	username = flask.request.form.get('username')
+	password = flask.request.form.get('new-password')
+
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
+
 
 @app.post("/create_post")
 def create_post():
