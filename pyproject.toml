@@ -10,7 +10,7 @@ readme = "README.md"
 argon2-cffi = "^21.3.0"
 flask = "^2.2.2"
 psycopg2 = "^2.9.5"
-python = "~3.10"
+python = "~3.10.0"
 tensorflow = "^2.10.0"
 
 [tool.poetry.group.dev.dependencies]
