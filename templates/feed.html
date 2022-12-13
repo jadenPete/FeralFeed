@@ -10,6 +10,8 @@
 {% block body %}
 	<div class="d-flex justify-content-center p-3">
 		<div class="col-xxl-10 d-flex justify-content-between">
+			
+			
 			<div class="sidebar me-3">
 				<div class="card shadow-sm">
 					<div class="card-body">
@@ -56,12 +58,33 @@
 					</div>
 				</div>
 			</div>
-
+			
+			
 			<div class="feed-column me-3">
+				{% block post %}
 				<div class="card mb-3 shadow">
 					<div class="card-body">
 						<h5 class="card-title">Create Post</h5>
 
+						<input type="checkbox" class="btn-check" id="greyCats" autocomplete="off" />
+						<label class="btn btn-outline-secondary btn-sm" for="greyCats">Grey Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="blackCats" autocomplete="off" />
+						<label class="btn btn-outline-dark btn-sm" for="blackCats">Black Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="whiteCats" autocomplete="off" />
+						<label class="btn btn-outline-warning btn-sm" for="whiteCats">White Cats</label>
+
+						<input type="checkbox" class="btn-check" id="babyCats" autocomplete="off" />
+						<label class="btn btn-outline-danger btn-sm" for="babyCats">Baby Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="bigCats" autocomplete="off" />
+						<label class="btn btn-outline-info btn-sm" for="bigCats">Big Cats</label>				
+
+						
+						<form class="card-text" id="userPost" action="/create_post" method="post">
+							<label class="mb-2" for="title">Title</label>
+    						<input type="text" class="form-control" id="title" name="title" placeholder="Enter Title">
 						<form
 							id="userPost"
 							class="card-text"
@@ -109,21 +132,27 @@
 							</div>
 						</form>
 					</div>
+					<input type="submit" form="userPost" class="btn btn-dark rounded-0 rounded-bottom"/>
 
-					<input type="submit"
-						class="btn btn-primary rounded-0 rounded-bottom"
-						form="userPost"/>
 				</div>
+				{% endblock %}
+				
 
+				
 				{% if posts|length > 0 %}
 					<div class="d-flex justify-content-center mb-3">
+						
 						{% for ordering in ["top", "new", "rising", "favorite"] %}
-							<button type="button"
-								class="sort-button btn btn-outline-primary{{ '' if ordering == 'favorite' else ' me-1' }}">
+			
+							<button type="button" class="sort-button btn btn-outline-dark{{ '' if ordering == 'favorite' else ' me-1' }}">
 								{{ ordering.capitalize() }}
 							</button>
+							
 						{% endfor %}
+						
 					</div>
+					
+				
 
 					<div class="card">
 						{% for post in posts %}
@@ -173,10 +202,11 @@
 									title="Downpurr">
 									<i class="downpurr fa fa-paw"></i>
 								</button>
-
+								<a href="/comment/6">
 								<button class="btn btn-block">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
 								</button>
+							</a>
 							</div>
 						{% endfor %}
 					</div>

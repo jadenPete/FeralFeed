@@ -81,7 +81,7 @@ def inject_user():
 @app.route("/")
 def index():
 	if get_user() is None:
-		return flask.render_template("landing.html")
+		return flask.render_template("landing.html", posts=[post.serialize() for post in get_db().posts()])
 
 	return flask.render_template(
 		"feed.html",
@@ -219,3 +219,43 @@ def sign_up():
 	response.set_cookie(CookieNames.TOKEN, user.create_token())
 
 	return response
+
+@app.post('/change_password')
+def change_password():
+	username = flask.request.form.get('username')
+	password = flask.request.form.get('new-password')
+
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
+
+
+@app.post("/create_post")
+def create_post():
+	title = flask.request.form.get("title", type=str)
+	description = flask.request.form.get("description", type=str)
+	picture = flask.request.form.get("picture")
+	user_id = get_user().id
+	
+
+	if not title:
+		flask.flash("Title is required", category='error')
+	elif not picture:
+		flask.flash("Picture is required", category='error')
+	else:
+		flask.flash("Post Successfully Created", category='success')
+		get_db().create_post(user_id,title,description, picture, "image/png")
+
+	return flask.redirect(flask.url_for("index"))
+
+
+@app.get("/comment/<int:post_id>")
+def comment(post_id):
+
+	
+
+	
+	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
