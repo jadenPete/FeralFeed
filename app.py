@@ -86,7 +86,8 @@ def index():
 	return flask.render_template(
 		"feed.html",
 		posts=[post.serialize() for post in get_db().posts()],
-		tags=[entry.value for entry in db.DatabasePostTag]
+		tags=[entry.value for entry in db.DatabasePostTag],
+		user=get_user().id
 	)
 
 @app.route("/about")
@@ -219,24 +220,6 @@ def change_password():
 		flask.flash("New password must be different.", category='error')
 		return flask.redirect(flask.url_for('settings'))
 
-
-@app.post("/create_post")
-def create_post():
-	title = flask.request.form.get("title", type=str)
-	description = flask.request.form.get("description", type=str)
-	picture = flask.request.form.get("picture")
-	user_id = get_user().id
-	
-
-	if not title:
-		flask.flash("Title is required", category='error')
-	elif not picture:
-		flask.flash("Picture is required", category='error')
-	else:
-		flask.flash("Post Successfully Created", category='success')
-		get_db().create_post(user_id,title,description, picture, "image/png")
-
-	return flask.redirect(flask.url_for("index"))
 
 
 @app.get("/comment/<int:post_id>")
