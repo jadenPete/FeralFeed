@@ -208,3 +208,4 @@ def create_post():
 @app.get("/comment/<int:post_id>")
 def comment(post_id):
 	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
+
