@@ -90,6 +90,12 @@ def index():
 		user=get_user().id
 	)
 
+@app.route("/thankyou")
+def thankyou():
+		return flask.render_template("thankyou.html")
+
+
+
 @app.route("/about")
 def about():
 	return flask.render_template("about.html")

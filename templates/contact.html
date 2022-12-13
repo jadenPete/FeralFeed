@@ -2,15 +2,22 @@
 {% set title = "" %}
 {% extends "base.html" %}
 {% block body %}
+
+
 <br>
 <h1 class="title">We are here to help!</h1>
 <br>
 <p class="title">Please send your message below. We will get back to you at the earliest.</p>
 
-<form action="https://formsubmit.co/infoferalfeed@gmail.com" id="contact_form" name="contact_form" method="post">
+<!-- <form  action="https://formsubmit.co/infoferalfeed@gmail.com" id="contact_form" name="contact_form" method="POST"> -->
+
+<form action="https://formsubmit.co/infoferalfeed@gmail.com" id="contact_form"  method="POST">
+
     <div class="row">
         <div class="col">
-            <input type="hidden" name="_next" value="https://feralfeed.com/templates/thankyou.html">
+            <!-- Please change the3 localhost and port number to your public p-age EX: http://webpages.charlote.edu/user/thankyou-->
+            <input type="hidden"  name="_next" value="http://127.0.0.1:5000/thankyou">
+
             <label>First Name</label>
             <input type="text" required maxlength="50" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
         </div>
@@ -43,5 +50,8 @@
     <button type="submit" class="btn btn-primary px-5 btn-lg align-content-center justify-content-center">Submit</button>
     </div>
 </form>
+
+
+
 {%endblock%}
 
