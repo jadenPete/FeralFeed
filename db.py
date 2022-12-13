@@ -202,6 +202,7 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"catnip": round(post_row[3] * post_row[4]),
 			"timestamp": post_row[5],
 			"image_url": flask.url_for("image", id=post_row[6]),
+			"id": self.id
 		}
 
 
@@ -241,6 +242,13 @@ class DatabaseUser:
 
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
+	
+	# Deleting from post tags as foreign key and from posts
+	def remove_post(self, post_id):
+		self.db.cur.execute("""
+		DELETE FROM post_tags WHERE post_id = %s;
+		DELETE FROM posts WHERE id = %s;
+		""", (post_id, post_id,))
 
 	def create_token(self):
 		token = str(uuid.uuid4())
