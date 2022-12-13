@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS comments (
 		self.conn.close()
 
 	def create_post(self, user_id, title, body, image_content, image_content_type, tags, confidence):
+		
 		self.cur.execute(
 			"""
 INSERT INTO images (content, content_type, confidence)
@@ -110,11 +111,12 @@ INSERT INTO images (content, content_type, confidence)
 			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
 			""" , (user_id, title, body, self.cur.fetchone()[0])) 
 
-		return DatabasePost(self, self.cur.fetchone()[0])
+		post_id = self.cur.fetchone()[0]
+		for tag in tags:
+			self.cur.execute("INSERT INTO post_tags VALUES (%s, %s);", (post_id, tag.value))
 
+		return DatabasePost(self, post_id)
 
-	def create_postTags(self, post_id, tag):
-		pass
 
 	def comments(self, user_id, post_id, content, catnip):
 		self.cur.execute(
@@ -125,8 +127,6 @@ INSERT INTO images (content, content_type, confidence)
 			""", (user_id, post_id, content, catnip)
 		)
 
-		for tag in tags:
-			self.cur.execute("INSERT INTO post_tags VALUES (%s, %s);", (post_id, tag.value))
 
 		return DatabasePost(self, post_id)
 
@@ -202,6 +202,7 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"catnip": round(post_row[3] * post_row[4]),
 			"timestamp": post_row[5],
 			"image_url": flask.url_for("image", id=post_row[6]),
+			"id": self.id
 		}
 
 
