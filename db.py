@@ -229,12 +229,6 @@ SELECT user_id, post_id, content
 			"content" : row[2],
 		}
 
-	
-
-
-	
-
-
 class DatabaseUser:
 	def __init__(self, db, id_):
 		self.db:Database = db
