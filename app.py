@@ -86,7 +86,8 @@ def index():
 	return flask.render_template(
 		"feed.html",
 		posts=[post.serialize() for post in get_db().posts()],
-		tags=[entry.value for entry in db.DatabasePostTag]
+		tags=[entry.value for entry in db.DatabasePostTag],
+		user=get_user().serialize()
 	)
 
 @app.route("/about")
@@ -193,6 +194,13 @@ def sign_in():
 	response.set_cookie(CookieNames.TOKEN, token)
 
 	return response
+
+@app.post('/delete')
+def delete_post():
+	post_id: int = flask.request.form.get('post-remove')
+	get_user().remove_post(post_id)
+	return flask.redirect(flask.url_for('index'))
+
 
 @app.route("/sign-out")
 def sign_out():
