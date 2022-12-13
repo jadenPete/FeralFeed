@@ -242,6 +242,13 @@ class DatabaseUser:
 
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
+	
+	# Deleting from post tags as foreign key and from posts
+	def remove_post(self, post_id):
+		self.db.cur.execute("""
+		DELETE FROM post_tags WHERE post_id = %s;
+		DELETE FROM posts WHERE id = %s;
+		""", (post_id, post_id,))
 
 	def create_token(self):
 		token = str(uuid.uuid4())
