@@ -1,9 +1,20 @@
 import flask
 import functools
+import io
 import json
+import numpy as np
 import os
+from PIL import Image
 
 import db
+
+# We were having some issues with Tensorflow on M1; we won't load the model on that platform
+try:
+	import model.predict
+
+	model_loaded = True
+except ModuleNotFoundError:
+	model_loaded = False
 
 class CookieNames:
 	TOKEN = "token"
@@ -39,6 +50,7 @@ def close_db(_):
 	if "db" in flask.g:
 		flask.g.db.__exit__()
 
+
 def get_db():
 	if "db" not in flask.g:
 		flask.g.db = db.Database(app.config)
@@ -55,15 +67,27 @@ def get_user():
 	return flask.g.user
 
 @app.context_processor
+def inject_debug():
+	return {
+		"debug": app.debug
+	}
+
+@app.context_processor
 def inject_user():
-	return {"user": get_user()}
+	return {
+		"user": get_user()
+	}
 
 @app.route("/")
 def index():
 	if get_user() is None:
-		return flask.render_template("landing.html")
+		return flask.render_template("landing.html", posts=[post.serialize() for post in get_db().posts()])
 
-	return flask.render_template("feed.html")
+	return flask.render_template(
+		"feed.html",
+		posts=[post.serialize() for post in get_db().posts()],
+		tags=[entry.value for entry in db.DatabasePostTag]
+	)
 
 @app.route("/thankyou")
 def thankyou():
@@ -78,6 +102,69 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
+
+@app.route("/image")
+def image():
+	try:
+		image_id = int(flask.request.args["id"])
+	except (KeyError, ValueError):
+		return "Please include an integer id query parameter.", 400
+
+	if (image_content_type := get_db().image(image_id)) is None:
+		return "An image with the given ID doesn't exist.", 404
+
+	return image_content_type[0], 200, {
+		"Content-Type": image_content_type[1]
+	}
+
+
+@app.post("/posts")
+def create_post_2():
+	title = flask.request.form.get("title")
+
+	if not title:
+		flask.flash("Title is required", category="error")
+	elif "picture" not in flask.request.files:
+		flask.flash("Picture is required", category="error")
+	else:
+		flask.flash("Post Successfully Created", category="success")
+
+		description = flask.request.form.get("description")
+
+		if description == "":
+			description = None
+
+		picture = flask.request.files["picture"].stream.read()
+		picture_mimetype = flask.request.files["picture"].mimetype
+
+		tags = []
+
+		for tag in db.DatabasePostTag:
+			if flask.request.form.get(f"{tag.value}-tag") == "on":
+				tags.append(tag)
+
+		if model_loaded:
+			picture_np = np.array(Image.open(io.BytesIO(picture)))
+
+			confidence = model.predict.predict(picture_np)
+		else:
+			confidence = 1
+
+		get_db().create_post(
+			get_user().id,
+			title,
+			description,
+			picture,
+			picture_mimetype,
+			tags,
+			confidence
+		)
+
+	return flask.redirect(flask.url_for("index"))
+
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html", user_data=get_user().serialize())
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():
@@ -125,3 +212,43 @@ def sign_up():
 	response.set_cookie(CookieNames.TOKEN, user.create_token())
 
 	return response
+
+@app.post('/change_password')
+def change_password():
+	username = flask.request.form.get('username')
+	password = flask.request.form.get('new-password')
+
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
+
+
+@app.post("/create_post")
+def create_post():
+	title = flask.request.form.get("title", type=str)
+	description = flask.request.form.get("description", type=str)
+	picture = flask.request.form.get("picture")
+	user_id = get_user().id
+	
+
+	if not title:
+		flask.flash("Title is required", category='error')
+	elif not picture:
+		flask.flash("Picture is required", category='error')
+	else:
+		flask.flash("Post Successfully Created", category='success')
+		get_db().create_post(user_id,title,description, picture, "image/png")
+
+	return flask.redirect(flask.url_for("index"))
+
+
+@app.get("/comment/<int:post_id>")
+def comment(post_id):
+
+	
+
+	
+	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
