@@ -202,6 +202,7 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"catnip": round(post_row[3] * post_row[4]),
 			"timestamp": post_row[5],
 			"image_url": flask.url_for("image", id=post_row[6]),
+			"id": self.id
 		}
 
 
@@ -227,12 +228,6 @@ SELECT user_id, post_id, content
 			"post_id" : row[1],
 			"content" : row[2],
 		}
-
-	
-
-
-	
-
 
 class DatabaseUser:
 	def __init__(self, db, id_):
