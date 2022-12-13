@@ -157,7 +157,24 @@
 
 										<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
 									</div>
+									{%if post['username'] == user['username']%}
+						<div class="dropdown">
 
+							<button class="btn btn-secondary dropdown-toggle btn-warning" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+							  More
+							</button>
+							<form action="/delete/{{post['id']}}" method="post">
+							<ul class="dropdown-menu text-bg-light" aria-labelledby="dropdownMenuButton1">
+							  <li>
+								<div class="d-flex">
+								  <button type="submit" class="btn btn-sm btn-danger dropdown-item">Purr-ge!<img role='button' src="https://i.ibb.co/wM84Cnw/image.png" style="position: absolute; top: 18%; right: 30%;" width='30' height="30" alt="Purge delete button"></button>
+
+								</div>
+							  </li>
+							</ul>
+						</form>
+						  </div>
+						  {% endif %}
 									<h5 class="fw-bold text-secondary">{{ post['catnip'] }} catnip</h5>
 								</div>
 							</div>

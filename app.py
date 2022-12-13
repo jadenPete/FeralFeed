@@ -87,7 +87,7 @@ def index():
 		"feed.html",
 		posts=[post.serialize() for post in get_db().posts()],
 		tags=[entry.value for entry in db.DatabasePostTag],
-		user=get_user().id
+		user=get_user().serialize()
 	)
 
 @app.route("/about")
@@ -156,6 +156,12 @@ def create_post_2():
 		)
 
 	return flask.redirect(flask.url_for("index"))
+
+@app.post('/delete/<int:post_id>')
+def delete_post(post_id: int):
+	get_user().remove_post(post_id)
+	return flask.redirect(flask.url_for('index'))
+
 
 @app.get("/settings")
 def settings():
