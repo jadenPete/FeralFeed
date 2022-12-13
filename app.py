@@ -65,6 +65,12 @@ def index():
 
 	return flask.render_template("feed.html")
 
+@app.route("/thankyou")
+def thankyou():
+		return flask.render_template("thankyou.html")
+
+
+
 @app.route("/about")
 def about():
 	return flask.render_template("about.html")
