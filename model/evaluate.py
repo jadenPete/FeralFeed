@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __init__ import FeralFeedModel
+from . import FeralFeedModel
 import dataset
 
 model = FeralFeedModel()

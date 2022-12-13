@@ -1,17 +1,25 @@
 import flask
 import functools
+import io
 import json
+import numpy as np
 import os
+from PIL import Image
 
 import db
+
+# We were having some issues with Tensorflow on M1; we won't load the model on that platform
+try:
+	import model.predict
+
+	model_loaded = True
+except ModuleNotFoundError:
+	model_loaded = False
 
 class CookieNames:
 	TOKEN = "token"
 
-
-
 app = flask.Flask(__name__)
-app.config['SECRET_KEY'] = 'super secret key'
 
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +83,11 @@ def index():
 	if get_user() is None:
 		return flask.render_template("landing.html", posts=[post.serialize() for post in get_db().posts()])
 
-	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
+	return flask.render_template(
+		"feed.html",
+		posts=[post.serialize() for post in get_db().posts()],
+		tags=[entry.value for entry in db.DatabasePostTag]
+	)
 
 @app.route("/about")
 def about():
@@ -84,10 +96,6 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
-
-@app.get("/settings")
-def settings():
-	return flask.render_template("settings.html",user_data=get_user().serialize())
 
 @app.route("/image")
 def image():
@@ -102,6 +110,68 @@ def image():
 	return image_content_type[0], 200, {
 		"Content-Type": image_content_type[1]
 	}
+
+@app.post("/password")
+def change_password():
+	username = flask.request.form.get("username")
+	password = flask.request.form.get("new-password")
+
+	if get_user().update_password(password):
+		flask.flash("Password successfully changed!")
+
+		return flask.redirect(flask.url_for("sign_out"))
+	else:
+		flask.flash("New password must be different.", category="error")
+
+		return flask.redirect(flask.url_for("settings"))
+
+@app.post("/posts")
+def create_post():
+	title = flask.request.form.get("title")
+
+	if not title:
+		flask.flash("Title is required", category="error")
+	elif "picture" not in flask.request.files:
+		flask.flash("Picture is required", category="error")
+	else:
+		flask.flash("Post Successfully Created", category="success")
+
+		description = flask.request.form.get("description")
+
+		if description == "":
+			description = None
+
+		picture = flask.request.files["picture"].stream.read()
+		picture_mimetype = flask.request.files["picture"].mimetype
+
+		tags = []
+
+		for tag in db.DatabasePostTag:
+			if flask.request.form.get(f"{tag.value}-tag") == "on":
+				tags.append(tag)
+
+		if model_loaded:
+			picture_np = np.array(Image.open(io.BytesIO(picture)))
+
+			confidence = model.predict.predict(picture_np)
+		else:
+			confidence = 1
+
+		get_db().create_post(
+			get_user().id,
+			title,
+			description,
+			picture,
+			picture_mimetype,
+			tags,
+			confidence
+		)
+
+	return flask.redirect(flask.url_for("index"))
+
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html", user_data=get_user().serialize())
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():

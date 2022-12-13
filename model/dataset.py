@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow_datasets as tfds
 
-from __init__ import FeralFeedModel
+from . import FeralFeedModel
 
 dataset, info = tfds.load("oxford_iiit_pet", shuffle_files=True, with_info=True)
 
