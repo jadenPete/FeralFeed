@@ -111,22 +111,9 @@ def image():
 		"Content-Type": image_content_type[1]
 	}
 
-@app.post("/password")
-def change_password():
-	username = flask.request.form.get("username")
-	password = flask.request.form.get("new-password")
-
-	if get_user().update_password(password):
-		flask.flash("Password successfully changed!")
-
-		return flask.redirect(flask.url_for("sign_out"))
-	else:
-		flask.flash("New password must be different.", category="error")
-
-		return flask.redirect(flask.url_for("settings"))
 
 @app.post("/posts")
-def create_post():
+def create_post_2():
 	title = flask.request.form.get("title")
 
 	if not title:
