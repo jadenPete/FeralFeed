@@ -86,8 +86,7 @@ def index():
 	return flask.render_template(
 		"feed.html",
 		posts=[post.serialize() for post in get_db().posts()],
-		tags=[entry.value for entry in db.DatabasePostTag],
-		user=get_user().serialize()
+		tags=[entry.value for entry in db.DatabasePostTag]
 	)
 
 @app.route("/about")
@@ -126,6 +125,49 @@ def change_password():
 
 		return flask.redirect(flask.url_for("settings"))
 
+@app.post("/posts")
+def create_post():
+	title = flask.request.form.get("title")
+
+	if not title:
+		flask.flash("Title is required", category="error")
+	elif "picture" not in flask.request.files:
+		flask.flash("Picture is required", category="error")
+	else:
+		flask.flash("Post Successfully Created", category="success")
+
+		description = flask.request.form.get("description")
+
+		if description == "":
+			description = None
+
+		picture = flask.request.files["picture"].stream.read()
+		picture_mimetype = flask.request.files["picture"].mimetype
+
+		tags = []
+
+		for tag in db.DatabasePostTag:
+			if flask.request.form.get(f"{tag.value}-tag") == "on":
+				tags.append(tag)
+
+		if model_loaded:
+			picture_np = np.array(Image.open(io.BytesIO(picture)))
+
+			confidence = model.predict.predict(picture_np)
+		else:
+			confidence = 1
+
+		get_db().create_post(
+			get_user().id,
+			title,
+			description,
+			picture,
+			picture_mimetype,
+			tags,
+			confidence
+		)
+
+	return flask.redirect(flask.url_for("index"))
 
 @app.get("/settings")
 def settings():
@@ -151,13 +193,6 @@ def sign_in():
 	response.set_cookie(CookieNames.TOKEN, token)
 
 	return response
-
-@app.post('/delete')
-def delete_post():
-	post_id: int = flask.request.form.get('post-remove')
-	get_user().remove_post(post_id)
-	return flask.redirect(flask.url_for('index'))
-
 
 @app.route("/sign-out")
 def sign_out():
@@ -185,6 +220,18 @@ def sign_up():
 
 	return response
 
+@app.post('/change_password')
+def change_password():
+	username = flask.request.form.get('username')
+	password = flask.request.form.get('new-password')
+
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
+
 
 @app.post("/create_post")
 def create_post():
@@ -207,5 +254,8 @@ def create_post():
 
 @app.get("/comment/<int:post_id>")
 def comment(post_id):
-	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
 
+	
+
+	
+	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
