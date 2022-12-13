@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS comments (
 	
 	def create_post(self, user_id, title, body, image_content, image_content_type):
 
+
 		self.cur.execute(
 			"""
 			INSERT INTO images 
@@ -112,10 +113,21 @@ CREATE TABLE IF NOT EXISTS comments (
 			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
 			""" , (user_id, title, body, self.cur.fetchone()[0])) 
 
-
 		return DatabasePost(self, self.cur.fetchone()[0])
+
+
 	def create_postTags(self, post_id, tag):
 		pass
+
+	def comments(self, user_id, post_id, content, catnip):
+		self.cur.execute(
+			"""
+		INSERT INTO comments 
+			(user_id, post_id, content, catnip)
+			VALUES (%s, %s, %s, %s) RETURNING id;
+			""", (user_id, post_id, content, catnip)
+		)
+		
 
 
 
@@ -145,6 +157,10 @@ CREATE TABLE IF NOT EXISTS comments (
 	def posts(self):
 		self.cur.execute("SELECT id FROM posts ORDER BY timestamp DESC;")
 
+		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
+
+	def post_by_id(self, id):
+		self.cur.execute("SELECT id FROM posts WHERE id = %s ORDER BY timestamp DESC;", (id))
 		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
 
 	def user_with_username(self, username):
@@ -194,6 +210,36 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"timestamp": post_row[5],
 			"image_url": flask.url_for("image", id=post_row[6]),
 		}
+
+
+
+class DatabaseComments:
+	def __init__(self, db, id_):
+		self.db:Database= db
+		self.id = id_
+
+	def serialize(self):
+		self.db.cur.execute(
+			"""
+SELECT user_id, post_id, content
+	FROM comments
+	JOIN posts ON post_id = posts.id
+	WHERE posts.id = %s;""", (self.id)
+		)
+
+		row = self.db.cur.fetchall()
+
+		return {
+			"user_id" : row[0],
+			"post_id" : row[1],
+			"content" : row[2],
+		}
+
+	
+
+
+	
+
 
 class DatabaseUser:
 	def __init__(self, db, id_):

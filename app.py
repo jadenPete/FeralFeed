@@ -73,7 +73,7 @@ def inject_user():
 @app.route("/")
 def index():
 	if get_user() is None:
-		return flask.render_template("landing.html")
+		return flask.render_template("landing.html", posts=[post.serialize() for post in get_db().posts()])
 
 	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
 
@@ -178,7 +178,14 @@ def create_post():
 	else:
 		flask.flash("Post Successfully Created", category='success')
 		get_db().create_post(user_id,title,description, picture, "image/png")
-		
-
 
 	return flask.redirect(flask.url_for("index"))
+
+
+@app.get("/comment/<int:post_id>")
+def comment(post_id):
+
+	
+
+	
+	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])
