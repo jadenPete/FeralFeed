@@ -168,7 +168,7 @@ INSERT INTO images (content, content_type, confidence)
 	def user_from_id(self, id):
 		self.cur.execute("SELECT username FROM users WHERE id = %s", (id,))
 
-		return DatabaseUser(self, self.cur.fetchone()[0]).id
+		return DatabaseUser(self, self.cur.fetchone()[0])
 	
 	
 

@@ -228,7 +228,7 @@ def change_password():
 def comment(post_id):
 	comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
 	user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
-	name_list = [get_db().user_from_id(id) for id in user_list]
+	name_list = [get_db().user_from_id(id).id for id in user_list]
 	comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
 
 	if flask.request.method == 'GET':
@@ -252,7 +252,7 @@ def comment(post_id):
 			get_db().comments(get_user().id, post_id, comment, 10)
 			comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
 			user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
-			name_list = [get_db().user_from_id(id) for id in user_list]
+			name_list = [get_db().user_from_id(id).id for id in user_list]
 			comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
 			
 			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
