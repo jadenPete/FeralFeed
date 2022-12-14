@@ -154,7 +154,7 @@ INSERT INTO comments
 		if self.cur.rowcount == 0:
 			return
 
-		return DatabasePost(self, self.cur.fetchone()[0])
+		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
 
 	def posts(self):
 		self.cur.execute("SELECT id FROM posts ORDER BY timestamp DESC;")
@@ -198,6 +198,8 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 	WHERE posts.id = %s;""", (self.id,)
 		)
 
+		
+
 		post_row = self.db.cur.fetchone()
 
 		self.db.cur.execute("SELECT tag FROM post_tags WHERE post_id = %s;", (self.id,))
@@ -215,17 +217,7 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"id": self.id
 		}
 
-	def uppurr(self):
-		self.db.cur.execute("UPDATE posts SET catnip = catnip + 1 WHERE id = %s;", (self.id,))
-
-# TODO: Remove this
-
-class DatabaseComments:
-	def __init__(self, db, id_):
-		self.db: Database= db
-		self.id = id_
-
-	def serialize(self):
+	def comment_serialize(self):
 		self.db.cur.execute(
 			"""
 SELECT comments.user_id, post_id, content
@@ -240,6 +232,15 @@ SELECT comments.user_id, post_id, content
 			"comments": [row[2] for row in rows],
 			"users": [row[0] for row in rows]
 		}
+
+	def uppurr(self):
+		self.db.cur.execute("UPDATE posts SET catnip = catnip + 1 WHERE id = %s;", (self.id,))
+class DatabaseComments:
+	def __init__(self, db, id_):
+		self.db: Database= db
+		self.id = id_
+
+	
 
 
 
@@ -281,16 +282,11 @@ INSERT INTO tokens
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
 
 	def remove_post(self, post_id):
-		self.db.execute("SELECT user_id FROM posts WHERE post_id = %s;", (post_id,))
-
-		if self.db.cur.rowcount == 0:
-			return
-
-		if self.db.cur.fetchone()[0] != self.id:
-			return False
 
 		self.db.cur.execute("DELETE FROM post_tags WHERE post_id = %s", (post_id,))
+		self.db.cur.execute("DELETE FROM comments WHERE post_id = %s;", (post_id,))
 		self.db.cur.execute("DELETE FROM posts WHERE id = %s;", (post_id,))
+		
 
 		return True
 
@@ -305,6 +301,7 @@ INSERT INTO tokens
 		self.db.cur.execute(
 			"UPDATE users SET password = %s WHERE id = %s", (self.db.ph.hash(password), self.id)
 		)
+		return True
 
 	def verify_password(self, password):
 		self.db.cur.execute("SELECT password FROM users WHERE id = %s;", (self.id,))

@@ -9,8 +9,8 @@
     <div class="form-group">
         <br>
         {%for post in posts%}
-        <form action="/posts/{{ post['id']}}/comments" method="post">
-        <label class="mb-2" for="comment">Commenting as <span class="link-primary" role="button">{{post['username']}}</span></label>
+        <form action="/posts/{{post['id']}}/comments" method="post">
+        <label class="mb-2" for="comment">Commenting as <span class="link-primary" role="button">{{user_name}}</span></label>
         {%endfor%}
         <textarea
             id="comment"
