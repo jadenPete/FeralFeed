@@ -66,6 +66,27 @@ def get_user():
 
 	return flask.g.user
 
+def index_posts(post_id, tag_filter, ordering):
+	posts = [post.serialize() for post in get_db().posts()]
+
+	if post_id is not None:
+		posts = [post for post in posts if post["id"] == post_id]
+
+	if tag_filter is not None:
+		posts = [post for post in posts if any(tag == tag_filter for tag in post["tags"])]
+
+	if ordering not in (None, "favorited"):
+		if ordering == "top":
+			key = lambda post: post["catnip"]
+		elif ordering == "new":
+			key = lambda post: -post["timestamp"].timestamp()
+		elif ordering == "rising":
+			key = index_reddit_hot_key
+
+		posts.sort(key=key)
+
+	return posts
+
 def index_reddit_hot_key(serialized_post):
 	# https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9
     sign = 1 if serialized_post["catnip"] > 0 else -1 if serialized_post["catnip"] < 0 else 0
@@ -187,43 +208,28 @@ def image():
 
 @app.route("/")
 def index():
-	post_filter = flask.request.args.get("post_id", type=int)
+	posts = index_posts(
+		flask.request.args.get("post_id", type=int),
+		flask.request.args.get("filter"),
+		flask.request.args.get("sort")
+	)
 
-	tag_filter = flask.request.args.get("filter")
-
-	ordering = flask.request.args.get("sort")
-
-	posts = [post.serialize() for post in get_db().posts()]
-
-	if post_filter is None:
-		posts_filtered = posts
-	else:
-		posts_filtered = [post for post in posts if post["id"] == post_filter]
-
-	if tag_filter is not None:
-		posts_filtered = \
-			[post for post in posts_filtered if any(tag == tag_filter for tag in post["tags"])]
-
-	if ordering in (None, "favorited"):
-		posts_sorted = posts_filtered
-	else:
-		if ordering == "top":
-			key = lambda post: post["catnip"]
-		elif ordering == "new":
-			key = lambda post: -post["timestamp"].timestamp()
-		elif ordering == "rising":
-			key = index_reddit_hot_key
-
-		posts_sorted = sorted(posts, key=key)
+	trending_posts = index_posts(None, None, "rising")
 
 	tags = [entry.value for entry in db.DatabasePostTag]
 
 	if get_user() is None:
-		return flask.render_template("landing.html", posts=posts_sorted, tags=tags)
+		return flask.render_template(
+			"landing.html",
+			posts=posts,
+			trending_posts=trending_posts,
+			tags=tags
+		)
 
 	return flask.render_template(
 		"feed.html",
-		posts=posts_sorted,
+		posts=posts,
+		trending_posts=trending_posts,
 		tags=tags,
 		user=get_user().serialize()
 	)

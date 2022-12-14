@@ -26,44 +26,21 @@
 					<div class="card-body">
 						<h5 class="card-title text-center">Trending Posts</h5>
 
-						<button type="button"
-							class="btn btn-outline-dark d-flex align-items-center mb-2 w-100">
-							<span class="me-3 text-secondary">512</span>
+						{% for post in trending_posts %}
+							<a
+								href="{{ url_for(request.endpoint, post_id=post['id']) }}"
+								class="btn btn-outline-dark d-flex align-items-center mb-2 w-100">
+								<span class="me-3 text-secondary">{{ post["catnip"] }}</span>
 
-							<div>
-								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
+								<div>
+									<h6 class="card-title mb-2 text-start">{{ post["title"] }}</h5>
 
-								<small class="card-subtitle d-block text-secondary text-start">
-									Posted by: Example_User-1
-								</small>
-							</div>
-						</button>
-
-						<button type="button"
-							class="btn btn-outline-dark d-flex align-items-center mb-2 w-100">
-							<span class="me-3 text-secondary">256</span>
-
-							<div>
-								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
-
-								<small class="card-subtitle d-block text-secondary text-start">
-									Posted by: Example_User-1
-								</small>
-							</div>
-						</button>
-
-						<button type="button"
-							class="btn btn-outline-dark d-flex align-items-center w-100">
-							<span class="me-3 text-secondary">128</span>
-
-							<div>
-								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
-
-								<small class="card-subtitle d-block text-secondary text-start">
-									Posted by: Example_User-1
-								</small>
-							</div>
-						</button>
+									<small class="card-subtitle d-block text-secondary text-start">
+										Posted by: {{ post["username"] }}
+									</small>
+								</div>
+							</a>
+						{% endfor %}
 					</div>
 				</div>
 			</div>
@@ -73,7 +50,7 @@
 
 				<div class="card mb-3 shadow" id="container" >
 					<div class="card-body" role="button">
-						<h5 class="card-title accordion text-center">Create Post</h5>		
+						<h5 class="card-title accordion text-center">Create Post</h5>
 						<div class="panel" style="opacity: 0; display:none; transition: all 0.9s ease-in-out; transition-delay: 0.9s;">
 						<form
 							id="userPost"
@@ -251,7 +228,7 @@ for (i = 0; i < acc.length; i++) {
     this.classList.toggle('text-center')
     this.classList.toggle("active");
 
-    
+
     var panel = this.nextElementSibling;
     if (panel.style.opacity == 1) {
 		panel.style.display = 'none'
@@ -267,7 +244,7 @@ for (i = 0; i < acc.length; i++) {
 
 window.addEventListener('scroll', function(e) {
   container = document.getElementById('container');
-  container.classList.toggle('scrolling', window.scrollY > 100); 
+  container.classList.toggle('scrolling', window.scrollY > 100);
 });
 	</script>
 {% endblock %}
