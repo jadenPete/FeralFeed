@@ -6,8 +6,33 @@ function enableTogglableIcons() {
 		})
 
 		icon.addEventListener("mouseout", () => {
+			if (icon.classList.contains('clicked'))
+			{
+				return;
+			}
 			icon.classList.remove("fa")
 			icon.classList.add("far")
+		})
+
+		icon.addEventListener('click', () =>
+		{
+			icon.classList.toggle('clicked');
+		})
+	}
+}
+
+function toggleFavorites()
+{
+	for (const heart of document.getElementsByClassName('fa-heart'))
+	{
+		heart.addEventListener('click', () =>
+		{
+			if (heart.classList.contains('clicked'))
+			{
+				heart.classList.remove('far');
+				heart.classList.remove('fa');
+				
+			}
 		})
 	}
 }
