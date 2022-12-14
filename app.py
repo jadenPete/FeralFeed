@@ -94,12 +94,12 @@ def inject_user():
 def about():
 	return flask.render_template("about.html")
 
-@app.post("/change_password")
+@app.post("/password")
 def change_password():
 	username = flask.request.form.get("username")
 	password = flask.request.form.get("new-password")
 
-	if (get_user().update_password(username, password)):
+	if (get_user().update_password(password)):
 		flask.flash("Password successfully changed!")
 		return flask.redirect(flask.url_for("sign_out"))
 	else:
@@ -169,7 +169,7 @@ def downpurr(post_id):
 	if (post := get_db().post_by_id(post_id)) is None:
 		return "That post doesn't exist.", 404
 
-	post.downpurr()
+	post[0].downpurr()
 
 	return flask.redirect(flask.url_for("index"))
 
@@ -289,22 +289,22 @@ def thankyou():
 def uppurr(post_id):
 	if (post := get_db().post_by_id(post_id)) is None:
 		return "That post doesn't exist.", 404
-    post.uppurr()
+	post[0].uppurr()
 
-	  return flask.redirect(flask.url_for("index"))
+	return flask.redirect(flask.url_for("index"))
 
 @app.route("/posts/<int:post_id>/comments", methods=['GET', 'POST'])
 def comment(post_id):
-	comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
-	user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
+	comments = get_db().post_by_id(post_id)[0].comment_serialize()['comments']
+	user_list = get_db().post_by_id(post_id)[0].comment_serialize()['users']
 	name_list = [get_db().user_from_id(id).id for id in user_list]
 	comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
 
 	if flask.request.method == 'GET':
 		if (get_user() is None):
-				return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+				return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
 		items=comment_container, user_name='Guest')
-		return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+		return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
 	items=comment_container,
 	user_name=get_user().serialize()['username'])
 		
@@ -312,19 +312,19 @@ def comment(post_id):
 	if flask.request.method == 'POST':
 		if (get_user() is None):
 			flask.flash("You must login to comment", category='error')
-			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
 	items=comment_container, user_name='Guest')
 		comment = flask.request.form.get('comment')
 		if not comment:
 			flask.flash("Comment is required", category='error')
 		else:
 			get_db().comments(get_user().id, post_id, comment, 10)
-			comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
-			user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
+			comments = get_db().post_by_id(post_id)[0].comment_serialize()['comments']
+			user_list = get_db().post_by_id(post_id)[0].comment_serialize()['users']
 			name_list = [get_db().user_from_id(id).id for id in user_list]
 			comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
 			
-			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
 	items=comment_container,
 	user_name=get_user().serialize()['username'])
 		
