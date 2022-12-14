@@ -57,17 +57,16 @@
 					</div>
 				</div>
 			</div>
-			
-			
+
 			<div class="feed-column me-3">
 				{% block post %}
 				<div class="card mb-3 shadow">
 					<div class="card-body">
-						<h5 class="card-title">Create Post</h5>		
+						<h5 class="card-title">Create Post</h5>
 						<form
 							id="userPost"
 							class="card-text"
-							action="/posts"
+							action="{{ url_for('create_post') }}"
 							method="post"
 							enctype="multipart/form-data">
 							{% for color in tags %}
@@ -115,20 +114,19 @@
 
 				</div>
 				{% endblock %}
-				
 
-				
+
+
 				{% if posts|length > 0 %}
 					<div class="d-flex justify-content-center mb-3">
-						
-						{% for ordering in ["top", "new", "rising", "favorite"] %}
-			
-							<button type="button" class="sort-button btn btn-outline-dark{{ '' if ordering == 'favorite' else ' me-1' }}">
+						{% for ordering in ["top", "new", "rising", "favorited"] %}
+							<a
+								class="sort-button btn {{ 'btn-dark' if request.args.get('sort') == ordering else 'btn-outline-dark' }}{{ '' if ordering == 'favorite' else ' me-1' }}"
+								href="{{ url_for(request.endpoint, sort=ordering) }}">
 								{{ ordering.capitalize() }}
-							</button>
-							
+							</a>
 						{% endfor %}
-						
+
 					</div>
 
 
@@ -180,7 +178,7 @@
 
 							<img class="w-100" src="{{ post['image_url'] }}">
 							<div class="card-body">
-								<a href="/upvote/{{post['id']}}" style="text-decoration:none;">
+								<a href="{{ url_for('uppurr', post_id=post['id']) }}" style="text-decoration:none;">
 									<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
@@ -190,10 +188,10 @@
 									<i class="fa fa-paw"></i>
 								</button>
 								</a>
-								
+
 								<span class="text-center">{{ post['catnip'] }}</span>
 
-								<a href="/downvote/{{post['id']}}" style="text-decoration:none;">
+								<a href="{{ url_for('downpurr', post_id=post['id']) }}" style="text-decoration:none;">
 								<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
@@ -202,10 +200,10 @@
 
 									<input type="text" hidden value="1" name="downvote">
 									<i class="downpurr fa fa-paw"></i>
-								</button>									
+								</button>
 								</a>
 
-								<a href="/comment/{{post['id']}}">
+								<a href="{{ url_for(request.endpoint, post_id=post['id']) }}">
 								<button class="btn btn-block">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
 								</button>
@@ -222,10 +220,11 @@
 						<h5 class="card-title text-center">Check Out</h5>
 
 						{% for color in ["grey", "black", "white", "baby", "big"] %}
-							<button type="button"
-								class="btn btn-outline-dark d-block mb-2 p-3 w-100">
+							<a
+								class="btn {{ 'btn-dark' if request.args.get('filter') == color else 'btn-outline-dark' }} d-block mb-2 p-3 w-100"
+								href="{{ url_for(request.endpoint, filter=color) }}">
 								<p class="my-0 text-center">{{ color.capitalize() }} Cats</p>
-							</button>
+							</a>
 						{% endfor %}
 					</div>
 				</div>
