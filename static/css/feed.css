@@ -1,0 +1,25 @@
+.downpurr {
+	transform: rotate(180deg);
+}
+
+.feed-column {
+	width: 55%;
+}
+
+.former-post {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.latter-post {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+.sidebar {
+	width: 20%;
+}
+
+.sort-button {
+	width: 10rem;
+}

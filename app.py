@@ -8,7 +8,10 @@ import db
 class CookieNames:
 	TOKEN = "token"
 
+
+
 app = flask.Flask(__name__)
+app.config['SECRET_KEY'] = 'super secret key'
 
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +42,7 @@ def close_db(_):
 	if "db" in flask.g:
 		flask.g.db.__exit__()
 
+
 def get_db():
 	if "db" not in flask.g:
 		flask.g.db = db.Database(app.config)
@@ -55,15 +59,23 @@ def get_user():
 	return flask.g.user
 
 @app.context_processor
+def inject_debug():
+	return {
+		"debug": app.debug
+	}
+
+@app.context_processor
 def inject_user():
-	return {"user": get_user()}
+	return {
+		"user": get_user()
+	}
 
 @app.route("/")
 def index():
 	if get_user() is None:
 		return flask.render_template("landing.html")
 
-	return flask.render_template("feed.html")
+	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
 
 @app.route("/about")
 def about():
@@ -72,6 +84,24 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
+
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html",user_data=get_user().serialize())
+
+@app.route("/image")
+def image():
+	try:
+		image_id = int(flask.request.args["id"])
+	except (KeyError, ValueError):
+		return "Please include an integer id query parameter.", 400
+
+	if (image_content_type := get_db().image(image_id)) is None:
+		return "An image with the given ID doesn't exist.", 404
+
+	return image_content_type[0], 200, {
+		"Content-Type": image_content_type[1]
+	}
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():
@@ -119,3 +149,24 @@ def sign_up():
 	response.set_cookie(CookieNames.TOKEN, user.create_token())
 
 	return response
+
+
+@app.post("/create_post")
+def create_post():
+	title = flask.request.form.get("title", type=str)
+	description = flask.request.form.get("description", type=str)
+	picture = flask.request.form.get("picture")
+	user_id = get_user().id
+	
+
+	if not title:
+		flask.flash("Title is required", category='error')
+	elif not picture:
+		flask.flash("Picture is required", category='error')
+	else:
+		flask.flash("Post Successfully Created", category='success')
+		get_db().create_post(user_id,title,description, picture, "image/png")
+		
+
+
+	return flask.redirect(flask.url_for("index"))

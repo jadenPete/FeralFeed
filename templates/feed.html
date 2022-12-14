@@ -1,138 +1,184 @@
 {% set title = "" %}
 {% extends "base.html" %}
+
+{% block head %}
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+
+	<script defer src="{{ url_for('static', filename='js/feed.js') }}"></script>
+{% endblock %}
+
 {% block body %}
+	<div class="d-flex justify-content-center p-3">
+		<div class="col-xxl-10 d-flex justify-content-between">
+			<div class="sidebar me-3">
+				<div class="card shadow-sm">
+					<div class="card-body">
+						<h5 class="card-title text-center">Trending Posts</h5>
 
-<div class="row">
-  <!-- Trending post -->
-  <div class="col" style="position:absolute; top:0; float:right; padding-left: 900px; padding-top: 75px">
-    <div class="card mt-3 m-2" style="width: 18rem;">
-      <div class="card-body">
+						<button type="button"
+							class="btn btn-outline-dark d-flex align-items-center mb-2 w-100">
+							<span class="me-3 text-secondary">512</span>
 
-        <!-- Post 1 -->
-        <h5 class="card-title text-center">Trending Posts</h5>
-        <div class="class-body  rounded border border-dark mt-1">
-          <p style="text-align:center">Say hello to this cutie</p>
-          <small>Post by: Example_User-1</small>
-        </div>
+							<div>
+								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
 
-        <!-- Post 2 -->
-        <div class="class-body   rounded border border-dark mt-2">
-          <p style="text-align:center">Cats gone wild</p>
-          <small>Post by: Example_User-2</small>
-        </div>
+								<small class="card-subtitle d-block text-secondary text-start">
+									Posted by: Example_User-1
+								</small>
+							</div>
+						</button>
 
-        <!-- Post 3 -->
-        <div class="class-body  rounded border border-dark mt-2">
-          <p style="text-align:center">Purring on ya </p>
-          <small>Post by: Example_User-3</small>
-        </div>
+						<button type="button"
+							class="btn btn-outline-dark d-flex align-items-center mb-2 w-100">
+							<span class="me-3 text-secondary">256</span>
 
-        <!-- Post 4 -->
-        <div class="class-body  rounded border border-dark mt-2">
-          <p style="text-align:center">Throwing things of the table</p>
-          <small>Post by: Example_User-4</small>
-        </div>
+							<div>
+								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
 
-        <!-- Post 5 -->
-        <div class="class-body   rounded border border-dark mt-2">
-          <p class="text-center">Ankle bitter at its finest</p>
-          <small>Post by: Example_User-5</small></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+								<small class="card-subtitle d-block text-secondary text-start">
+									Posted by: Example_User-1
+								</small>
+							</div>
+						</button>
 
-    
-  <div class="row">
-    <!-- Trending post -->
-    <div class="col" style="position:absolute; top:0; float:right; padding-left: 900px; padding-top: 550px">
-      <div class="card mt-3 m-2" style="width: 18rem;">
-        <div class="card-body">
-          <!-- Post 1 -->
-          <h5 class="card-title text-center">Check Out</h5>
-          <div class="class-body  rounded border border-dark mt-1">
-            <p><center>Grey Cats</center></p>
-          </div>
-        <!-- Post 5 -->
-        <div class="class-body   rounded border border-dark mt-2">
-            <p><center>Black Cats</center></p>
-          </div>
-        <!-- Post 5 -->
-        <div class="class-body   rounded border border-dark mt-2">
-            <p><center>White Cats</center></p>
-          </div>
-        <!-- Post 5 -->
-        <div class="class-body   rounded border border-dark mt-2">
-            <p><center>Baby Cats</center></p>
-          </div>
-          <div class="class-body   rounded border border-dark mt-2">
-            <p><center>Big Cats</center></p>
-          </div>
-  
-        </div>
-      </div>
-    </div>
-</div>
-    
-  <div class="col" style="position:absolute; top:0; float:right; padding-top: 75px">
+						<button type="button"
+							class="btn btn-outline-dark d-flex align-items-center w-100">
+							<span class="me-3 text-secondary">128</span>
 
-    <!-- Content 1 -->
+							<div>
+								<h6 class="card-title mb-2 text-start">Say hello to this cutie</h5>
 
-    <div class="card  mt-3" style="width: 50rem;">
-        <div class="card-body">
-          <h5 class="card-title">Create Post:</h5>
-          <p class="card-text">Add Image Here:</p>
-        </div>
-        <button type="button" class="btn btn-primary">Submit</button>
-    </div>
+								<small class="card-subtitle d-block text-secondary text-start">
+									Posted by: Example_User-1
+								</small>
+							</div>
+						</button>
+					</div>
+				</div>
+			</div>
 
-    <div class="card  mt-3" style="width: 50rem;">
-        <div class="card-body text-center" >
-            <button type="button" class="btn btn-primary d-inline" style="width: 10rem;">Top</button>
-            <button type="button" class="btn btn-primary d-inline" style="width: 10rem;">New</button>
-            <button type="button" class="btn btn-primary d-inline" style="width: 10rem;">Favorite</button>
-        </div>
-    </div>
+			<div class="feed-column me-3">
+				<div class="card mb-3 shadow">
+					<div class="card-body">
+						<h5 class="card-title">Create Post</h5>
+
+		
+						<input type="checkbox" class="btn-check" id="greyCats" autocomplete="off" />
+						<label class="btn btn-outline-secondary btn-sm" for="greyCats">Grey Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="blackCats" autocomplete="off" />
+						<label class="btn btn-outline-dark btn-sm" for="blackCats">Black Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="whiteCats" autocomplete="off" />
+						<label class="btn btn-outline-warning btn-sm" for="whiteCats">White Cats</label>
+
+						<input type="checkbox" class="btn-check" id="babyCats" autocomplete="off" />
+						<label class="btn btn-outline-danger btn-sm" for="babyCats">Baby Cats</label>
+						
+						<input type="checkbox" class="btn-check" id="bigCats" autocomplete="off" />
+						<label class="btn btn-outline-info btn-sm" for="bigCats">Big Cats</label>				
+
+						
+						<form class="card-text" id="userPost" action="/create_post" method="post">
+							<label class="mb-2" for="title">Title</label>
+    						<input type="text" class="form-control" id="title" name="title" placeholder="Enter Title">
+							<div class="form-group">
+								<label class="mt-3 mb-2" for="description">Description</label>
+								<textarea class="form-control" id="description" rows="3"></textarea>
+							</div>
+							<label class="mt-3 mb-2" for="picture">Cat Picture</label>
+							<div class="form-group">
+								<input type="file" accept=".png, .jpeg" class="form-control" id="picture" name="picture" >
+							</div>
+						</form>
 
 
-    <div class="card  mt-3" style="width: 50rem;">
-      <div class="card-body">
-        <p class="card-text"><small class="">By: User_Example</small></p>
-        <h5 class="card-title">A CUTE CAT</h5>
-        <p class="card-text">This is not my cat, but i thought it looked cute.</p>
-      </div>
-      <img
-        src="https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-superJumbo.jpg?quality=75&auto=webp"
-        class="card-img-bottom" alt="">
 
-      <!-- Like, Dislike, and commnet -->
-      <div class="card-body">
-        <button class="btn btn-block"><i class="fa fa-angle-double-up"></i> </button>
-        <p class="d-inline">100</p>
-        <button class="btn btn-block "><i class="fa fa-angle-double-down "></i> </button>
-        <button class="btn btn-block"><i class="fa fa-commenting-o" aria-hidden="true"> Comment</i> </button>
-      </div>
-    </div>
+					</div>
+					<input type="submit" form="userPost" class="btn btn-primary rounded-0 rounded-bottom"/>
+				</div>
 
-    <!-- Content 2 -->
-    <div class="card mt-3" style="width: 50rem;">
-      <div class="card-body">
-        <p class="card-text"><small class="">By: User_Example</small></p>
-        <h5 class="card-title">A CUTE CAT</h5>
-        <p class="card-text">This is not my cat, but i thought it looked cute.</p>
-      </div>
-      <img
-        src="https://static.scientificamerican.com/sciam/cache/file/32665E6F-8D90-4567-9769D59E11DB7F26_source.jpg?w=590&h=800&7E4B4CAD-CAE1-4726-93D6A160C2B068B2"
-        class="card-img-bottom" alt="">
+				{% if posts|length > 0 %}
+					<div class="d-flex justify-content-center mb-3">
+						{% for ordering in ["top", "new", "rising", "favorite"] %}
+							<button type="button" class="sort-button btn btn-outline-primary{{ '' if ordering == 'favorite' else ' me-1' }}">
+								{{ ordering.capitalize() }}
+							</button>
+						{% endfor %}
+					</div>
 
-      <!-- Like, Dislike, and commnet -->
-      <div class="card-body">
-        <button class="btn btn-block"><i class="fa fa-angle-double-up"> </i> </button>
-        <p class="d-inline">100</p>
-        <button class="btn btn-block"><i class="fa fa-angle-double-down"></i> </button>
-        <button class="btn btn-block"><i class="fa fa-commenting-o" aria-hidden="true"> Comment</i> </button>
-      </div>
-    </div>
-</div>
+					<div class="card">
+						{% for post in posts %}
+							<div class="card-body d-flex justify-content-between">
+								<div>
+									<p class="card-subtitle text-secondary mb-2">
+										Posted by <b>{{ post['username'] }}</b> on {{ post['timestamp'].strftime('%m/%d/%Y at %I:%M %p') }}
+									</p>
+
+									<h5 class="card-title">{{ post['title'] }}</h5>
+
+									<p class="card-text">{{ post['body'] }}</p>
+								</div>
+
+								<div class="d-flex align-items-end flex-column">
+									<div class="d-flex align-items-center mb-3">
+										{% for tag in post['tags'] %}
+											<span class="badge border border-dark me-1 rounded-pill text-dark">
+												{{ tag|capitalize }} cat
+											</span>
+										{% endfor %}
+
+										<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
+									</div>
+
+									<h5 class="fw-bold text-secondary">{{ post['catnip'] }} catnip</h5>
+								</div>
+							</div>
+
+							<img class="w-100" src="{{ post['image_url'] }}">
+
+							<div class="card-body">
+								<button
+									class="btn btn-block"
+									data-bs-toggle="tooltip"
+									data-bs-placement="bottom"
+									title="Uppurr">
+									<i class="fa fa-paw"></i>
+								</button>
+
+								<span class="text-center">{{ post['catnip'] }}</span>
+
+								<button
+									class="btn btn-block"
+									data-bs-toggle="tooltip"
+									data-bs-placement="bottom"
+									title="Downpurr">
+									<i class="downpurr fa fa-paw"></i>
+								</button>
+
+								<button class="btn btn-block">
+									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
+								</button>
+							</div>
+						{% endfor %}
+					</div>
+				{% endif %}
+			</div>
+
+			<div class="sidebar">
+				<div class="card shadow-sm">
+					<div class="card-body">
+						<h5 class="card-title text-center">Check Out</h5>
+
+						{% for color in ["grey", "black", "white", "baby", "big"] %}
+							<button type="button"
+								class="btn btn-outline-dark d-block mb-2 p-3 w-100">
+								<p class="my-0 text-center">{{ color.capitalize() }} Cats</p>
+							</button>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}
