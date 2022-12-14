@@ -1,12 +1,34 @@
 {% set title = "" %}
-{% extends "landing.html" %}
+{% extends "feed.html" %}
 
 {%block landing%}
 
-<div>
-    {%block comment%}{%endblock%}
-</div>
+    {%block post%}{%endblock%}
+    {% block comment%}
+    
+    <div class="form-group">
+        <br>
+        {%for post in posts%}
+        <form action="/comment/{{post['id']}}" method="post">
+        <label class="mb-2" for="comment">Commenting as <span class="link-primary" role="button">{{user_name}}</span></label>
+        {%endfor%}
+        <textarea
+            id="comment"
+            class="form-control mb-3"
+            name="comment"
+            rows="3"
+            placeholder="Share your thoughts"></textarea>
+          
+            <div class="text-center">
+          
+            <button type="submit" class="btn btn-dark rounded-0 rounded-pill">Add Comment</button>
+        
+        </div>
+        </form>
+    </div>
+    {% endblock %}
 
+    
 
 {%endblock%}
 

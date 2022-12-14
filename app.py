@@ -22,6 +22,8 @@ class CookieNames:
 
 app = flask.Flask(__name__)
 
+app.config['SECRET_KEY'] = "SUPERSECIRTKEY"
+
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -289,6 +291,13 @@ def sign_up():
 def thankyou():
 	return flask.render_template("thankyou.html")
 
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
+
 @app.get("/posts/<int:post_id>/uppurr")
 def uppurr(post_id):
 	if (post := get_db().post_by_id(post_id)) is None:
@@ -297,3 +306,39 @@ def uppurr(post_id):
 	post.uppurr()
 
 	return flask.redirect(flask.url_for("index"))
+
+@app.get("/comment/<int:post_id>")
+def comment(post_id):
+	comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
+	user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
+	name_list = [get_db().user_from_id(id) for id in user_list]
+	comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
+
+	if flask.request.method == 'GET':
+		if (get_user() is None):
+				return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+		items=comment_container, user_name='Guest')
+		return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+	items=comment_container,
+	user_name=get_user().serialize()['username'])
+
+
+	if flask.request.method == 'POST':
+		if (get_user() is None):
+			flask.flash("You must login to comment", category='error')
+			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+	items=comment_container, user_name='Guest')
+		comment = flask.request.form.get('comment')
+		if not comment:
+			flask.flash("Comment is required", category='error')
+		else:
+			get_db().comments(get_user().id, post_id, comment, 10)
+			comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
+			user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
+			name_list = [get_db().user_from_id(id) for id in user_list]
+			comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
+			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
+	items=comment_container,
+	user_name=get_user().serialize()['username'])
+
+	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])

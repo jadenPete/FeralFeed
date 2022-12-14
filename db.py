@@ -126,7 +126,7 @@ INSERT INTO comments
 		)
 
 
-		return DatabasePost(self, post_id)
+		return DatabaseComments(self, post_id)
 
 	def create_user(self, username, password):
 		try:
@@ -166,6 +166,12 @@ INSERT INTO comments
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
+	def user_from_id(self, id):
+		self.cur.execute("SELECT username FROM users WHERE id = %s", (id,))
+
+		return self.cur.fetchone()[0]
+
+
 
 	def verify_token(self, token):
 		self.cur.execute("DELETE FROM tokens WHERE expiration < NOW();")
@@ -173,7 +179,7 @@ INSERT INTO comments
 		self.cur.execute("SELECT user_id FROM tokens WHERE uuid = %s;", (token,))
 
 		if self.cur.rowcount > 0:
-			return DatabaseUser(self, self.cur.fetchone()[0])
+			return DatabaseUser(self, self.cur.fetchall()[0])
 
 class DatabasePost:
 	def __init__(self, db, id_):
@@ -223,18 +229,17 @@ class DatabaseComments:
 	def serialize(self):
 		self.db.cur.execute(
 			"""
-SELECT user_id, post_id, content
+SELECT comments.user_id, post_id, content
 	FROM comments
 	JOIN posts ON post_id = posts.id
-	WHERE posts.id = %s;""", (self.id)
+	WHERE posts.id = %s;""", (self.id,)
 		)
 
-		row = self.db.cur.fetchall()
+		rows = self.db.cur.fetchall()
 
 		return {
-			"user_id" : row[0],
-			"post_id" : row[1],
-			"content" : row[2],
+			"comments": [row[2] for row in rows],
+			"users": [row[0] for row in rows]
 		}
 
 class DatabaseUser:
