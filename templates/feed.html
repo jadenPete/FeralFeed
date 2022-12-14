@@ -154,8 +154,9 @@
 												{{ tag|capitalize }} cat
 											</span>
 										{% endfor %}
-
-										<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
+										<a href="/favorites/{{post['id']}}">
+											<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
+										</a>
 									</div>
 									{%if post['username'] == user['username']%}
 						<div class="dropdown">
