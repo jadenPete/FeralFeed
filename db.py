@@ -167,11 +167,10 @@ INSERT INTO comments
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
 
-	def user_from_id(self, id_):
-		self.cur.execute("SELECT FROM users WHERE id = %s;", (id_,))
+	def user_from_id(self, id):
+		self.cur.execute("SELECT username FROM users WHERE id = %s", (id,))
 
-		if self.cur.rowcount == 1:
-			return DatabaseUser(self, id_)
+		return DatabaseUser(self, self.cur.fetchone()[0]).id
 
 	def verify_token(self, token):
 		self.cur.execute("DELETE FROM tokens WHERE expiration < NOW();")
@@ -249,7 +248,6 @@ class DatabaseComments:
 	def __init__(self, db, id_):
 		self.db:Database= db
 		self.id = id_
-
 
 
 
