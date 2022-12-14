@@ -63,7 +63,6 @@ CREATE TABLE IF NOT EXISTS posts (
 );"""
 		)
 
-
 		try:
 			self.cur.execute(
 				"CREATE TYPE post_tag AS ENUM ('grey', 'black', 'white', 'baby', 'big');"
@@ -94,34 +93,8 @@ CREATE TABLE IF NOT EXISTS comments (
 	def __exit__(self):
 		self.cur.close()
 		self.conn.close()
-	
-	def create_post(self, user_id, title, body, image_content, image_content_type):
-
-		self.cur.execute(
-			"""
-			INSERT INTO images 
-				(content, content_type, confidence)  
-				VALUES (%s, %s, 1) RETURNING id; 
-				""", (image_content, image_content_type))
-
-
-		self.cur.execute(
-			"""
-		INSERT INTO posts 
-			(user_id, title, body, image_id, catnip, timestamp) 
-			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
-			""" , (user_id, title, body, self.cur.fetchone()[0])) 
-
-
-		return DatabasePost(self, self.cur.fetchone()[0])
-	def create_postTags(self, post_id, tag):
-		pass
-
-
-
 
 	def create_post(self, user_id, title, body, image_content, image_content_type, tags, confidence):
-		
 		self.cur.execute(
 			"""
 INSERT INTO images (content, content_type, confidence)
@@ -131,25 +104,25 @@ INSERT INTO images (content, content_type, confidence)
 
 		self.cur.execute(
 			"""
-		INSERT INTO posts 
-			(user_id, title, body, image_id, catnip, timestamp) 
-			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
-			""" , (user_id, title, body, self.cur.fetchone()[0])) 
+INSERT INTO posts
+	(user_id, title, body, image_id, catnip, timestamp)
+	VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id;""" ,
+			(user_id, title, body, self.cur.fetchone()[0])
+		)
 
 		post_id = self.cur.fetchone()[0]
+
 		for tag in tags:
 			self.cur.execute("INSERT INTO post_tags VALUES (%s, %s);", (post_id, tag.value))
 
 		return DatabasePost(self, post_id)
 
-
 	def comments(self, user_id, post_id, content, catnip):
 		self.cur.execute(
 			"""
-		INSERT INTO comments 
-			(user_id, post_id, content, catnip)
-			VALUES (%s, %s, %s, %s) RETURNING id;
-			""", (user_id, post_id, content, catnip)
+INSERT INTO comments
+	(user_id, post_id, content, catnip)
+	VALUES (%s, %s, %s, %s) RETURNING id;""", (user_id, post_id, content, catnip)
 		)
 
 
@@ -175,14 +148,17 @@ INSERT INTO images (content, content_type, confidence)
 
 			return bytes(row[0]), row[1]
 
+	def post_by_id(self, id_):
+		self.cur.execute("SELECT id FROM posts WHERE id = %s ORDER BY timestamp DESC;", (id_,))
+
+		if self.cur.rowcount == 0:
+			return
+
+		return DatabasePost(self, self.cur.fetchone()[0])
+
 	def posts(self):
 		self.cur.execute("SELECT id FROM posts ORDER BY timestamp DESC;")
 
-		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
-
-
-	def post_by_id(self, id):
-		self.cur.execute("SELECT id FROM posts WHERE id = %s ORDER BY timestamp DESC;", (id))
 		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
 
 	def user_with_username(self, username):
@@ -198,30 +174,14 @@ INSERT INTO images (content, content_type, confidence)
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
-	
-	
-	def addCatnip(self, post_id):
-		self.cur.execute("""
-		update posts
-		set catnip = catnip+1
-		where id=%s
-		;
-		""", (post_id))
-
-
-	def subCatnip(self, post_id):
-		self.cur.execute("""
-		update posts
-		set catnip = catnip-1
-		where id=%s
-		;
-		""", (post_id))
-
 
 class DatabasePost:
 	def __init__(self, db, id_):
 		self.db: Database = db
 		self.id = id_
+
+	def downpurr(self):
+		self.db.cur.execute("UPDATE posts SET catnip = catnip - 1 WHERE id = %s;", (self.id,))
 
 	def serialize(self):
 		self.db.cur.execute(
@@ -250,13 +210,14 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"id": self.id
 		}
 
-		
+	def uppurr(self):
+		self.db.cur.execute("UPDATE posts SET catnip = catnip + 1 WHERE id = %s;", (self.id,))
 
-
+# TODO: Remove this
 
 class DatabaseComments:
 	def __init__(self, db, id_):
-		self.db:Database= db
+		self.db: Database= db
 		self.id = id_
 
 	def serialize(self):
@@ -278,30 +239,8 @@ SELECT user_id, post_id, content
 
 class DatabaseUser:
 	def __init__(self, db, id_):
-		self.db:Database = db
+		self.db: Database = db
 		self.id = id_
-
-	def serialize(self):
-		self.db.cur.execute(
-			f"""
-SELECT username FROM users WHERE id = {self.id};
-			"""
-		)
-		return {
-			"username" : self.db.cur.fetchone()[0]
-		}
-
-	def delete_token(self):
-		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
-	
-
-	
-	# Deleting from post tags as foreign key and from posts
-	def remove_post(self, post_id):
-		self.db.cur.execute("""
-		DELETE FROM post_tags WHERE post_id = %s;
-		DELETE FROM posts WHERE id = %s;
-		""", (post_id, post_id,))
 
 	def create_token(self):
 		token = str(uuid.uuid4())
@@ -318,12 +257,23 @@ INSERT INTO tokens
 		)
 
 		return token
-	
-	def get_username(self):
-		print(self.id)
-		self.db.cur.execute(f'SELECT username FROM users WHERE id = {self.id}')
-		if (self.db.cur.rowcount > 0):
-			return self.db.cur.fetchone()[0]
+
+	def delete_token(self):
+		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
+
+	def remove_post(self, post_id):
+		self.db.execute("SELECT user_id FROM posts WHERE post_id = %s;", (post_id,))
+
+		if self.db.cur.rowcount == 0:
+			return
+
+		if self.db.cur.fetchone()[0] != self.id:
+			return False
+
+		self.db.cur.execute("DELETE FROM post_tags WHERE post_id = %s", (post_id,))
+		self.db.cur.execute("DELETE FROM posts WHERE id = %s;", (post_id,))
+
+		return True
 
 	def serialize(self):
 		self.db.cur.execute("SELECT username FROM users WHERE id = %s", (self.id,))
@@ -334,7 +284,7 @@ INSERT INTO tokens
 
 	def update_password(self, password):
 		self.db.cur.execute(
-			"UPDATE users SET password = %s WHERE id = %s", (self.db.ph.hash(password), self.id_)
+			"UPDATE users SET password = %s WHERE id = %s", (self.db.ph.hash(password), self.id)
 		)
 
 	def verify_password(self, password):
