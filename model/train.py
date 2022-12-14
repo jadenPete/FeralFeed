@@ -3,7 +3,7 @@
 import os
 import tensorflow as tf
 
-from __init__ import FeralFeedModel
+from . import FeralFeedModel
 import dataset
 
 model = FeralFeedModel()

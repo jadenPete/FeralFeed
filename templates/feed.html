@@ -10,6 +10,7 @@
 {% block body %}
 	<div class="d-flex justify-content-center p-3">
 		<div class="col-xxl-10 d-flex justify-content-between">
+
 			<div class="sidebar me-3">
 				<div class="card shadow-sm">
 					<div class="card-body">
@@ -56,56 +57,80 @@
 					</div>
 				</div>
 			</div>
-
+			
+			
 			<div class="feed-column me-3">
+				{% block post %}
 				<div class="card mb-3 shadow">
 					<div class="card-body">
-						<h5 class="card-title">Create Post</h5>
+						<h5 class="card-title">Create Post</h5>		
+						<form
+							id="userPost"
+							class="card-text"
+							action="/posts"
+							method="post"
+							enctype="multipart/form-data">
+							{% for color in tags %}
+								<input type="checkbox"
+									id="{{ color }}-tag-input"
+									class="btn-check"
+									name="{{ color }}-tag"
+									autocomplete="off">
 
-		
-						<input type="checkbox" class="btn-check" id="greyCats" autocomplete="off" />
-						<label class="btn btn-outline-secondary btn-sm" for="greyCats">Grey Cats</label>
-						
-						<input type="checkbox" class="btn-check" id="blackCats" autocomplete="off" />
-						<label class="btn btn-outline-dark btn-sm" for="blackCats">Black Cats</label>
-						
-						<input type="checkbox" class="btn-check" id="whiteCats" autocomplete="off" />
-						<label class="btn btn-outline-warning btn-sm" for="whiteCats">White Cats</label>
+								<label
+									class="btn btn-outline-dark btn-sm mb-3"
+									for="{{ color }}-tag-input">{{ color.capitalize() }} Cats
+								</label>
+							{% endfor %}
 
-						<input type="checkbox" class="btn-check" id="babyCats" autocomplete="off" />
-						<label class="btn btn-outline-danger btn-sm" for="babyCats">Baby Cats</label>
-						
-						<input type="checkbox" class="btn-check" id="bigCats" autocomplete="off" />
-						<label class="btn btn-outline-info btn-sm" for="bigCats">Big Cats</label>				
+							<label class="d-block mb-2" for="title">Title</label>
+    						<input type="text"
+								id="title"
+								class="form-control mb-3"
+								name="title"
+								placeholder="Enter Title">
 
-						
-						<form class="card-text" id="userPost" action="/create_post" method="post">
-							<label class="mb-2" for="title">Title</label>
-    						<input type="text" class="form-control" id="title" name="title" placeholder="Enter Title">
 							<div class="form-group">
-								<label class="mt-3 mb-2" for="description">Description</label>
-								<textarea class="form-control" id="description" rows="3"></textarea>
+								<label class="mb-2" for="description">Description</label>
+
+								<textarea
+									id="description"
+									class="form-control mb-3"
+									name="description"
+									rows="3"></textarea>
 							</div>
-							<label class="mt-3 mb-2" for="picture">Cat Picture</label>
+
+							<label class="mb-2" for="picture">Cat Picture</label>
+
 							<div class="form-group">
-								<input type="file" accept=".png, .jpeg" class="form-control" id="picture" name="picture" >
+								<input type="file"
+									id="picture"
+									class="form-control"
+									name="picture"
+									accept=".png, .jpeg, .jpg">
 							</div>
 						</form>
-
-
-
 					</div>
-					<input type="submit" form="userPost" class="btn btn-primary rounded-0 rounded-bottom"/>
-				</div>
+					<input type="submit" form="userPost" class="btn btn-dark rounded-0 rounded-bottom"/>
 
+				</div>
+				{% endblock %}
+				
+
+				
 				{% if posts|length > 0 %}
 					<div class="d-flex justify-content-center mb-3">
+						
 						{% for ordering in ["top", "new", "rising", "favorite"] %}
-							<button type="button" class="sort-button btn btn-outline-primary{{ '' if ordering == 'favorite' else ' me-1' }}">
+			
+							<button type="button" class="sort-button btn btn-outline-dark{{ '' if ordering == 'favorite' else ' me-1' }}">
 								{{ ordering.capitalize() }}
 							</button>
+							
 						{% endfor %}
+						
 					</div>
+
 
 					<div class="card">
 						{% for post in posts %}
@@ -130,35 +155,60 @@
 
 										<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
 									</div>
+									{%if post['username'] == user['username']%}
+						<div class="dropdown">
 
+							<button class="btn btn-secondary dropdown-toggle btn-warning" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+							  More
+							</button>
+							<form action="/delete/{{post['id']}}" method="post">
+							<ul class="dropdown-menu text-bg-light" aria-labelledby="dropdownMenuButton1">
+							  <li>
+								<div class="d-flex">
+								  <button type="submit" class="btn btn-sm btn-danger dropdown-item">Purr-ge!<img role='button' src="https://i.ibb.co/wM84Cnw/image.png" style="position: absolute; top: 18%; right: 30%;" width='30' height="30" alt="Purge delete button"></button>
+
+								</div>
+							  </li>
+							</ul>
+						</form>
+						  </div>
+						  {% endif %}
 									<h5 class="fw-bold text-secondary">{{ post['catnip'] }} catnip</h5>
 								</div>
 							</div>
 
 							<img class="w-100" src="{{ post['image_url'] }}">
-
 							<div class="card-body">
-								<button
+								<a href="/upvote/{{post['id']}}" style="text-decoration:none;">
+									<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
 									data-bs-placement="bottom"
 									title="Uppurr">
+									<input type="text" hidden value="1" name="upvote">
 									<i class="fa fa-paw"></i>
 								</button>
-
+								</a>
+								
 								<span class="text-center">{{ post['catnip'] }}</span>
 
+								<a href="/downvote/{{post['id']}}" style="text-decoration:none;">
 								<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
 									data-bs-placement="bottom"
 									title="Downpurr">
-									<i class="downpurr fa fa-paw"></i>
-								</button>
 
+									<input type="text" hidden value="1" name="downvote">
+									<i class="downpurr fa fa-paw"></i>
+								</button>									
+								</a>
+
+								<a href="/comment/{{post['id']}}">
 								<button class="btn btn-block">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
 								</button>
+							</a>
 							</div>
 						{% endfor %}
 					</div>
