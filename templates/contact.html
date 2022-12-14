@@ -2,6 +2,8 @@
 {% set title = "Contact" %}
 {% extends "base.html" %}
 {% block body %}
+
+
 <br>
 <h1 class="title">We are here to help!</h1>
 <br>
@@ -11,7 +13,9 @@
 <form action="https://formsubmit.co/infoferalfeed@gmail.com" id="contact_form" name="contact_form" method="post">
     <div class="row m-auto">
         <div class="col">
-            <input type="hidden" name="_next" value="https://feralfeed.com/templates/thankyou.html">
+            <!-- Please change the3 localhost and port number to your public p-age EX: http://webpages.charlote.edu/user/thankyou-->
+            <input type="hidden"  name="_next" value="http://127.0.0.1:5000/thankyou">
+
             <label>First Name</label>
             <input type="text" required maxlength="50" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
         </div>
@@ -47,5 +51,6 @@
     </div>
 </form>
 </div>
+
 {%endblock%}
 

@@ -2,6 +2,7 @@ import flask
 import functools
 import io
 import json
+import math
 import numpy as np
 import os
 from PIL import Image
@@ -52,7 +53,6 @@ def close_db(_):
 	if "db" in flask.g:
 		flask.g.db.__exit__()
 
-
 def get_db():
 	if "db" not in flask.g:
 		flask.g.db = db.Database(app.config)
@@ -68,6 +68,16 @@ def get_user():
 
 	return flask.g.user
 
+def index_reddit_hot_key(serialized_post):
+	# https://medium.com/hacking-and-gonzo/how-reddit-ranking-algorithms-work-ef111e33d0d9
+    sign = 1 if serialized_post["catnip"] > 0 else -1 if serialized_post["catnip"] < 0 else 0
+
+    order = math.log10(max(abs(serialized_post["catnip"]), 1))
+
+    seconds = serialized_post["timestamp"].timestamp() - 1134028003
+
+    return round(sign * order + seconds / 45000, 7)
+
 @app.context_processor
 def inject_debug():
 	return {
@@ -80,43 +90,28 @@ def inject_user():
 		"user": get_user()
 	}
 
-@app.route("/")
-def index():
-	if get_user() is None:
-		return flask.render_template("landing.html", posts=[post.serialize() for post in get_db().posts()])
-
-	return flask.render_template(
-		"feed.html",
-		posts=[post.serialize() for post in get_db().posts()],
-		tags=[entry.value for entry in db.DatabasePostTag],
-		user=get_user().id
-	)
-
 @app.route("/about")
 def about():
 	return flask.render_template("about.html")
+
+@app.post("/change_password")
+def change_password():
+	username = flask.request.form.get("username")
+	password = flask.request.form.get("new-password")
+
+	if (get_user().update_password(username, password)):
+		flask.flash("Password successfully changed!")
+		return flask.redirect(flask.url_for("sign_out"))
+	else:
+		flask.flash("New password must be different.", category="error")
+		return flask.redirect(flask.url_for("settings"))
 
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
 
-@app.route("/image")
-def image():
-	try:
-		image_id = int(flask.request.args["id"])
-	except (KeyError, ValueError):
-		return "Please include an integer id query parameter.", 400
-
-	if (image_content_type := get_db().image(image_id)) is None:
-		return "An image with the given ID doesn't exist.", 404
-
-	return image_content_type[0], 200, {
-		"Content-Type": image_content_type[1]
-	}
-
-
 @app.post("/posts")
-def create_post_2():
+def create_post():
 	title = flask.request.form.get("title")
 
 	if not title:
@@ -159,9 +154,85 @@ def create_post_2():
 
 	return flask.redirect(flask.url_for("index"))
 
+@app.post("/posts/<int:post_id>/delete")
+def delete_post(post_id):
+	if (authorized := get_user().remove_post(post_id)) is None:
+		return "That post doesn't exist.", 404
+
+	if not authorized:
+		return "You didn't create that post.", 401
+
+	return flask.redirect(flask.url_for("index"))
+
+@app.get("/posts/<int:post_id>/downpurr")
+def downpurr(post_id):
+	if (post := get_db().post_by_id(post_id)) is None:
+		return "That post doesn't exist.", 404
+
+	post.downpurr()
+
+	return flask.redirect(flask.url_for("index"))
+
+@app.route("/image")
+def image():
+	try:
+		image_id = int(flask.request.args["id"])
+	except (KeyError, ValueError):
+		return "Please include an integer id query parameter.", 400
+
+	if (image_content_type := get_db().image(image_id)) is None:
+		return "An image with the given ID doesn't exist.", 404
+
+	return image_content_type[0], 200, {
+		"Content-Type": image_content_type[1]
+	}
+
+@app.route("/")
+def index():
+	post_filter = flask.request.args.get("post_id", type=int)
+
+	tag_filter = flask.request.args.get("filter")
+
+	ordering = flask.request.args.get("sort")
+
+	posts = [post.serialize() for post in get_db().posts()]
+
+	if post_filter is None:
+		posts_filtered = posts
+	else:
+		posts_filtered = [post for post in posts if post["id"] == post_filter]
+
+	if tag_filter is not None:
+		posts_filtered = \
+			[post for post in posts_filtered if any(tag == tag_filter for tag in post["tags"])]
+
+	if ordering in (None, "favorited"):
+		posts_sorted = posts_filtered
+	else:
+		if ordering == "top":
+			key = lambda post: post["catnip"]
+		elif ordering == "new":
+			key = lambda post: -post["timestamp"].timestamp()
+		elif ordering == "rising":
+			key = index_reddit_hot_key
+
+		posts_sorted = sorted(posts, key=key)
+
+	tags = [entry.value for entry in db.DatabasePostTag]
+
+	if get_user() is None:
+		return flask.render_template("landing.html", posts=posts_sorted, tags=tags)
+
+	return flask.render_template(
+		"feed.html",
+		posts=posts_sorted,
+		tags=tags,
+		user=get_user().serialize()
+	)
+
 @app.get("/settings")
 def settings():
-	return flask.render_template("settings.html", user_data=get_user().serialize())
+	return flask.render_template("settings.html",user_data=get_user().serialize())
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():
@@ -210,19 +281,17 @@ def sign_up():
 
 	return response
 
-@app.post('/change_password')
-def change_password():
-	username = flask.request.form.get('username')
-	password = flask.request.form.get('new-password')
+@app.route("/thankyou")
+def thankyou():
+	return flask.render_template("thankyou.html")
 
-	if (get_user().update_password(username, password)):
-		flask.flash('Password successfully changed!')
-		return flask.redirect(flask.url_for('sign_out'))
-	else:
-		flask.flash("New password must be different.", category='error')
-		return flask.redirect(flask.url_for('settings'))
+@app.get("/posts/<int:post_id>/uppurr")
+def uppurr(post_id):
+	if (post := get_db().post_by_id(post_id)) is None:
+		return "That post doesn't exist.", 404
+    post.uppurr()
 
-
+	  return flask.redirect(flask.url_for("index"))
 
 @app.route("/posts/<int:post_id>/comments", methods=['GET', 'POST'])
 def comment(post_id):
@@ -259,6 +328,3 @@ def comment(post_id):
 	items=comment_container,
 	user_name=get_user().serialize()['username'])
 		
-
-	
-	

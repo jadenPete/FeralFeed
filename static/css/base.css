@@ -1,3 +1,42 @@
+/*:root{
+	--primary-color: #edf2fc;
+	--secondary-color: #212121;
+
+	--primary-color: #000106;
+	--secondary-color: #fff;
+	
+	
+	
+	color-scheme: dark;
+
+}
+
+body {
+	
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+	
+
+	background-color: black;
+	color: white;
+	
+}
+
+.dark-mode {
+	background-color: black;
+	color: white;
+}
+
+
+#iconz{
+	cursor: pointer;
+	position: relative;
+	top: 22px;
+	left: 540px;
+}
+*/
+
+
 .header {
 	background-color: #ffda6a;
 }
@@ -20,3 +59,4 @@
 		align-items: center;
 			
 }
+
