@@ -164,10 +164,11 @@ INSERT INTO images (content, content_type, confidence)
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
+			
 	def user_from_id(self, id):
 		self.cur.execute("SELECT username FROM users WHERE id = %s", (id,))
 
-		return self.cur.fetchone()[0]
+		return DatabaseUser(self, self.cur.fetchone()[0]).id
 	
 	
 
