@@ -22,7 +22,7 @@ class CookieNames:
 
 app = flask.Flask(__name__)
 
-app.config['SECRET_KEY'] = "SUPERSECIRTKEY"
+
 
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -307,7 +307,7 @@ def uppurr(post_id):
 
 	return flask.redirect(flask.url_for("index"))
 
-@app.get("/comment/<int:post_id>")
+@app.route("/posts/<int:post_id>/comments", methods=['GET', 'POST'])
 def comment(post_id):
 	comments = get_db().post_by_id([post_id])[0].comment_serialize()['comments']
 	user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
@@ -337,6 +337,7 @@ def comment(post_id):
 			user_list = get_db().post_by_id([post_id])[0].comment_serialize()['users']
 			name_list = [get_db().user_from_id(id) for id in user_list]
 			comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
+
 			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
 	items=comment_container,
 	user_name=get_user().serialize()['username'])
