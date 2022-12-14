@@ -180,9 +180,6 @@ def downvote(post_id):
 	get_db().subCatnip([post_id])
 	return flask.redirect(flask.url_for('index'))
 
-@app.get("/settings")
-def settings():
-	return flask.render_template("settings.html", user_data=get_user().serialize())
 
 @app.get('/upvote/<int:post_id>')
 def upvote(post_id):
