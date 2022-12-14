@@ -173,6 +173,24 @@ INSERT INTO images (content, content_type, confidence)
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
 
+	def addCatnip(self, post_id):
+		self.cur.execute("""
+		update posts
+		set catnip = catnip+1
+		where id=%s
+		;
+		""", (post_id))
+
+
+	def subCatnip(self, post_id):
+		self.cur.execute("""
+		update posts
+		set catnip = catnip-1
+		where id=%s
+		;
+		""", (post_id))
+
+
 class DatabasePost:
 	def __init__(self, db, id_):
 		self.db: Database = db
@@ -187,13 +205,13 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 	JOIN images ON image_id = images.id
 	WHERE posts.id = %s;""", (self.id,)
 		)
-
+	
 		post_row = self.db.cur.fetchone()
 
 		self.db.cur.execute("SELECT tag FROM post_tags WHERE post_id = %s;", (self.id,))
 
 		tag_rows = self.db.cur.fetchall()
-
+	
 		return {
 			"username": post_row[0],
 			"title": post_row[1],
@@ -204,6 +222,8 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"image_url": flask.url_for("image", id=post_row[6]),
 			"id": self.id
 		}
+
+		
 
 
 
@@ -242,6 +262,8 @@ class DatabaseUser:
 
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
+	
+
 	
 	# Deleting from post tags as foreign key and from posts
 	def remove_post(self, post_id):
