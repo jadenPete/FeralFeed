@@ -62,8 +62,9 @@
 			<div class="feed-column me-3">
 				{% block post %}
 				<div class="card mb-3 shadow">
-					<div class="card-body">
-						<h5 class="card-title">Create Post</h5>		
+					<div class="card-body" role="button">
+						<h5 class="card-title accordion">Create Post</h5>		
+						<div class="panel" style="opacity: 0; display:none; transition: all 0.9s ease-in-out; transition-delay: 0.9s;">
 						<form
 							id="userPost"
 							class="card-text"
@@ -111,7 +112,8 @@
 							</div>
 						</form>
 					</div>
-					<input type="submit" form="userPost" class="btn btn-dark rounded-0 rounded-bottom"/>
+				</div>
+				<input type="submit" form="userPost" class="submit btn btn-dark rounded-0 rounded-bottom" style="display: none;"/>
 
 				</div>
 				{% endblock %}
@@ -232,4 +234,27 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    
+    this.classList.toggle("active");
+
+    
+    var panel = this.nextElementSibling;
+    if (panel.style.opacity == 1) {
+		panel.style.display = 'none'
+      panel.style.opacity = 0;
+	  document.querySelector('.submit').style.display='none';
+    } else {
+      panel.style.opacity = 1;
+	  panel.style.display = 'block'
+	  document.querySelector('.submit').style.display='block';
+    }
+  });
+}
+	</script>
 {% endblock %}
