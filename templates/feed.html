@@ -181,24 +181,37 @@
 
 							<img class="w-100" src="{{ post['image_url'] }}">
 
+
+
+
+
 							<div class="card-body">
-								<button
+								<a href="/upvote/{{post['id']}}">
+									<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
 									data-bs-placement="bottom"
 									title="Uppurr">
+									<input type="text" hidden value="1" name="upvote">
 									<i class="fa fa-paw"></i>
 								</button>
-
+								</a>
+								
 								<span class="text-center">{{ post['catnip'] }}</span>
 
+								<a href="/downvote/{{post['id']}}">
 								<button
 									class="btn btn-block"
 									data-bs-toggle="tooltip"
 									data-bs-placement="bottom"
 									title="Downpurr">
+									<input type="text" hidden value="1" name="downvote">
 									<i class="downpurr fa fa-paw"></i>
-								</button>
+								</button>									
+								</a>
+
+
+
 								<a href="/comment/{{post['id']}}">
 								<button class="btn btn-block">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
