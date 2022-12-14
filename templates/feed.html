@@ -10,8 +10,7 @@
 {% block body %}
 	<div class="d-flex justify-content-center p-3">
 		<div class="col-xxl-10 d-flex justify-content-between">
-			
-			
+
 			<div class="sidebar me-3">
 				<div class="card shadow-sm">
 					<div class="card-body">
@@ -131,8 +130,7 @@
 						{% endfor %}
 						
 					</div>
-					
-				
+
 
 					<div class="card">
 						{% for post in posts %}
@@ -180,11 +178,6 @@
 							</div>
 
 							<img class="w-100" src="{{ post['image_url'] }}">
-
-
-
-
-
 							<div class="card-body">
 								<a href="/upvote/{{post['id']}}" style="text-decoration:none;">
 									<button
@@ -205,6 +198,7 @@
 									data-bs-toggle="tooltip"
 									data-bs-placement="bottom"
 									title="Downpurr">
+
 									<input type="text" hidden value="1" name="downvote">
 									<i class="downpurr fa fa-paw"></i>
 								</button>									

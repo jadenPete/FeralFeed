@@ -1,0 +1,52 @@
+.accordion {
+    width: 80%;
+    margin: 1rem auto;
+    line-height: 1.5;
+}
+
+.accordion-label {
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 1rem 0.5rem;
+    text-align: left;
+    background-color: #665105;
+    transition: opacity 0.5s ease-out;
+    border: none;
+    color: white;
+    position: relative;
+}
+
+.accordion-content {
+    margin-bottom: 0.5rem;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.5s ease-in-out;
+}
+
+.accordion-content.open {
+    height: var(--content-height);
+    overflow: auto;
+}
+
+.accordion-label.open {
+    opacity: 1;
+}
+
+.accordion-label::after {
+    content: '+';
+    position: absolute;
+    right: 1rem;
+    font-size: 1.2rem;
+}
+
+.accordion-label.open::after {
+    content: '-';
+    font-size: 1.5rem;
+}
+
+
+
+
+

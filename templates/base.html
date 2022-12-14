@@ -54,7 +54,6 @@
 							</a>
 						</li>
 					{% else %}
-
 						<a class="btn btn-outline-dark mx-2" href="{{ url_for('settings') }}">
 							<i class="fa fa-gear fs-6 me-2"></i>Settings</a>
 						<a class="btn btn-outline-dark" href="{{ url_for('sign_out') }}">
@@ -62,8 +61,24 @@
 						</a>
 					{% endif %}
 				</ul>
-			</div>
+			</div>	
 		</header>
+			<script>
+			</script>
+
+		{% with messages = get_flashed_messages(with_categories=true) %} {% if
+			messages %} {% for category, message in messages %} {% if category ==
+			'error' %}
+			<div class="alert alert-danger fade show text-center" role="alert">
+			  {{ message }}
+			  <!-- <button type="button" class="btn-close" data-bs-dismiss="alert"></button> -->
+			</div>
+			{% else %}
+			<div class="alert alert-success fade show text-center" role="alert">
+			  {{ message }}
+			  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+			</div>
+			{% endif %} {% endfor %} {% endif %} {% endwith %}
 
 		{% with messages = get_flashed_messages(with_categories=true) %}
 			{% if messages %}

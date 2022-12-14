@@ -94,6 +94,31 @@ CREATE TABLE IF NOT EXISTS comments (
 	def __exit__(self):
 		self.cur.close()
 		self.conn.close()
+	
+	def create_post(self, user_id, title, body, image_content, image_content_type):
+
+		self.cur.execute(
+			"""
+			INSERT INTO images 
+				(content, content_type, confidence)  
+				VALUES (%s, %s, 1) RETURNING id; 
+				""", (image_content, image_content_type))
+
+
+		self.cur.execute(
+			"""
+		INSERT INTO posts 
+			(user_id, title, body, image_id, catnip, timestamp) 
+			VALUES (%s, %s, %s, %s, 0 , NOW()) RETURNING id; 
+			""" , (user_id, title, body, self.cur.fetchone()[0])) 
+
+
+		return DatabasePost(self, self.cur.fetchone()[0])
+	def create_postTags(self, post_id, tag):
+		pass
+
+
+
 
 	def create_post(self, user_id, title, body, image_content, image_content_type, tags, confidence):
 		
@@ -155,6 +180,7 @@ INSERT INTO images (content, content_type, confidence)
 
 		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
 
+
 	def post_by_id(self, id):
 		self.cur.execute("SELECT id FROM posts WHERE id = %s ORDER BY timestamp DESC;", (id))
 		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
@@ -172,6 +198,13 @@ INSERT INTO images (content, content_type, confidence)
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
+
+class DatabasePost:
+	def __init__(self, db, id_):
+		self.db:Database= db
+		self.id = id_
+
+
 
 	def addCatnip(self, post_id):
 		self.cur.execute("""
@@ -205,13 +238,13 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 	JOIN images ON image_id = images.id
 	WHERE posts.id = %s;""", (self.id,)
 		)
-	
+
 		post_row = self.db.cur.fetchone()
 
 		self.db.cur.execute("SELECT tag FROM post_tags WHERE post_id = %s;", (self.id,))
 
 		tag_rows = self.db.cur.fetchall()
-	
+
 		return {
 			"username": post_row[0],
 			"title": post_row[1],
@@ -249,16 +282,20 @@ SELECT user_id, post_id, content
 			"content" : row[2],
 		}
 
-	
-
-
-	
-
-
 class DatabaseUser:
 	def __init__(self, db, id_):
 		self.db:Database = db
 		self.id = id_
+
+	def serialize(self):
+		self.db.cur.execute(
+			f"""
+SELECT username FROM users WHERE id = {self.id};
+			"""
+		)
+		return {
+			"username" : self.db.cur.fetchone()[0]
+		}
 
 	def delete_token(self):
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
@@ -287,6 +324,12 @@ INSERT INTO tokens
 		)
 
 		return token
+	
+	def get_username(self):
+		print(self.id)
+		self.db.cur.execute(f'SELECT username FROM users WHERE id = {self.id}')
+		if (self.db.cur.rowcount > 0):
+			return self.db.cur.fetchone()[0]
 
 	def serialize(self):
 		self.db.cur.execute("SELECT username FROM users WHERE id = %s", (self.id,))

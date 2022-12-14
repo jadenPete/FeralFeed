@@ -19,7 +19,10 @@ except ModuleNotFoundError:
 class CookieNames:
 	TOKEN = "token"
 
+
+
 app = flask.Flask(__name__)
+app.config['SECRET_KEY'] = 'super secret key'
 
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -94,8 +97,6 @@ def index():
 def thankyou():
 		return flask.render_template("thankyou.html")
 
-
-
 @app.route("/about")
 def about():
 	return flask.render_template("about.html")
@@ -103,6 +104,11 @@ def about():
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
+
+
+@app.get("/settings")
+def settings():
+	return flask.render_template("settings.html",user_data=get_user().serialize())
 
 @app.route("/image")
 def image():
@@ -229,6 +235,7 @@ def sign_up():
 	response.set_cookie(CookieNames.TOKEN, user.create_token())
 
 	return response
+
 
 @app.post('/change_password')
 def change_password():
