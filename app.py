@@ -167,11 +167,12 @@ def create_post_2():
 def delete_post(post_id: int):
 	get_user().remove_post(post_id)
 	return flask.redirect(flask.url_for('index'))
+	
 
 @app.get('/downvote/<int:post_id>')
 def downvote(post_id):
 	get_db().subCatnip([post_id])
-	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
+	return flask.redirect(flask.url_for('index'))
 
 @app.get("/settings")
 def settings():
@@ -180,7 +181,7 @@ def settings():
 @app.get('/upvote/<int:post_id>')
 def upvote(post_id):
 	get_db().addCatnip([post_id])
-	return flask.render_template("feed.html", posts=[post.serialize() for post in get_db().posts()])
+	return flask.redirect(flask.url_for('index'))
 
 @app.route("/sign-in", methods=["GET", "POST"])
 def sign_in():
