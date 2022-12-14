@@ -71,6 +71,7 @@
 					{% if category == 'error' %}
 						<div class="alert alert-danger fade show text-center" role="alert">
 							{{ message }}
+							<button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
 						</div>
 					{% else %}
 						<div
@@ -86,5 +87,7 @@
 		{% endwith %}
 
 		{% block body %}{% endblock %}
+
+		
 	</body>
 </html>

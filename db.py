@@ -128,7 +128,7 @@ INSERT INTO images (content, content_type, confidence)
 		)
 
 
-		return DatabasePost(self, post_id)
+		return DatabaseComments(self, post_id)
 
 	def create_user(self, username, password):
 		try:
@@ -164,6 +164,12 @@ INSERT INTO images (content, content_type, confidence)
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
+	def user_from_id(self, id):
+		self.cur.execute("SELECT username FROM users WHERE id = %s", (id,))
+
+		return self.cur.fetchone()[0]
+	
+	
 
 	def verify_token(self, token):
 		self.cur.execute("DELETE FROM tokens WHERE expiration < NOW();")
@@ -171,7 +177,7 @@ INSERT INTO images (content, content_type, confidence)
 		self.cur.execute("SELECT user_id FROM tokens WHERE uuid = %s;", (token,))
 
 		if self.cur.rowcount > 0:
-			return DatabaseUser(self, self.cur.fetchone()[0])
+			return DatabaseUser(self, self.cur.fetchall()[0])
 
 class DatabasePost:
 	def __init__(self, db, id_):
@@ -205,30 +211,32 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 			"id": self.id
 		}
 
+	def comment_serialize(self):
+		self.db.cur.execute(
+			"""
+SELECT comments.user_id, post_id, content
+	FROM comments
+	JOIN posts ON post_id = posts.id
+	WHERE posts.id = %s;""", (self.id,)
+		)
+
+		rows = self.db.cur.fetchall()
+
+		return {
+			"comments": [row[2] for row in rows],
+			"users": [row[0] for row in rows]
+		}
+
+
 
 
 class DatabaseComments:
 	def __init__(self, db, id_):
 		self.db:Database= db
 		self.id = id_
+	
 
-	def serialize(self):
-		self.db.cur.execute(
-			"""
-SELECT user_id, post_id, content
-	FROM comments
-	JOIN posts ON post_id = posts.id
-	WHERE posts.id = %s;""", (self.id)
-		)
-
-		row = self.db.cur.fetchall()
-
-		return {
-			"user_id" : row[0],
-			"post_id" : row[1],
-			"content" : row[2],
-		}
-
+	
 	
 
 
@@ -258,6 +266,8 @@ INSERT INTO tokens
 		)
 
 		return token
+
+	
 
 	def serialize(self):
 		self.db.cur.execute("SELECT username FROM users WHERE id = %s", (self.id,))

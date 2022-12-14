@@ -8,6 +8,8 @@
 {% endblock %}
 
 {% block body %}
+
+	<button onclick="topFunction()" id="toTop" title="GoToTop" class="btn btn-outline-dark" style="display: none;position: fixed;bottom: 20px;right: 30px;z-index: 99;font-size: 18px; cursor: pointer; padding: 15px; border-radius: 4px;">Go to Top</button>
 	<div class="d-flex justify-content-center p-3">
 		<div class="col-xxl-10 d-flex justify-content-between">
 			
@@ -186,7 +188,23 @@
 								<button class="btn btn-block">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
 								</button>
-							</a>
+								</a>
+								
+								
+								{%block comment%} {%endblock%}
+
+								{%for item in items%}
+
+
+								<div class="card mb-2 mt-2">
+									<div class="card-body ">
+										<h6 class="card-title">By: <span class="link-primary">{{item[1]}}</span></h6>
+										<p class="card-text">{{item[0]}}</p>
+									</div>
+								</div>
+				
+								{%endfor%}
+
 							</div>
 						{% endfor %}
 					</div>
@@ -209,4 +227,28 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		let myB = document.getElementById('toTop');
+		window.onscroll = function() 
+		{
+			scrollFunction();
+		}
+		function scrollFunction()
+		{
+			if (document.body.scrollTop > 550 || document.documentElement.scrollTop > 550)
+			{
+				myB.style.display = 'block';
+			}
+			else
+			{
+				myB.style.display = 'none';
+			}
+		}
+
+		function topFunction()
+		{
+			document.body.scrollTop = 0;
+			document.documentElement.scrollTop = 0;
+		}
+	</script>
 {% endblock %}
