@@ -198,14 +198,8 @@ INSERT INTO images (content, content_type, confidence)
 
 		if self.cur.rowcount > 0:
 			return DatabaseUser(self, self.cur.fetchone()[0])
-
-class DatabasePost:
-	def __init__(self, db, id_):
-		self.db:Database= db
-		self.id = id_
-
-
-
+	
+	
 	def addCatnip(self, post_id):
 		self.cur.execute("""
 		update posts
