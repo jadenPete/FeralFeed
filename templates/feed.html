@@ -5,6 +5,16 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
 
 	<script defer src="{{ url_for('static', filename='js/feed.js') }}"></script>
+	<style>
+
+#container.scrolling {
+  /* style when scrolling */
+  position: fixed;
+  bottom: 5%;
+  right:73%;
+  z-index:500;
+}
+	</style>
 {% endblock %}
 
 {% block body %}
@@ -60,9 +70,11 @@
 
 			<div class="feed-column me-3">
 				{% block post %}
-				<div class="card mb-3 shadow">
-					<div class="card-body">
-						<h5 class="card-title">Create Post</h5>
+
+				<div class="card mb-3 shadow" id="container" >
+					<div class="card-body" role="button">
+						<h5 class="card-title accordion text-center">Create Post</h5>		
+						<div class="panel" style="opacity: 0; display:none; transition: all 0.9s ease-in-out; transition-delay: 0.9s;">
 						<form
 							id="userPost"
 							class="card-text"
@@ -110,7 +122,8 @@
 							</div>
 						</form>
 					</div>
-					<input type="submit" form="userPost" class="btn btn-dark rounded-0 rounded-bottom"/>
+				</div>
+				<input type="submit" form="userPost" class="submit btn btn-dark rounded-0 rounded-bottom" style="display: none;"/>
 
 				</div>
 				{% endblock %}
@@ -150,9 +163,7 @@
 												{{ tag|capitalize }} cat
 											</span>
 										{% endfor %}
-										<a href="/favorites/{{post['id']}}">
 											<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
-										</a>
 									</div>
 									{%if post['username'] == user['username']%}
 						<div class="dropdown">
@@ -231,4 +242,32 @@
 			</div>
 		</div>
 	</div>
+	<script>
+		var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle('text-center')
+    this.classList.toggle("active");
+
+    
+    var panel = this.nextElementSibling;
+    if (panel.style.opacity == 1) {
+		panel.style.display = 'none'
+      panel.style.opacity = 0;
+	  document.querySelector('.submit').style.display='none';
+    } else {
+      panel.style.opacity = 1;
+	  panel.style.display = 'block'
+	  document.querySelector('.submit').style.display='block';
+    }
+  });
+}
+
+window.addEventListener('scroll', function(e) {
+  container = document.getElementById('container');
+  container.classList.toggle('scrolling', window.scrollY > 100); 
+});
+	</script>
 {% endblock %}
