@@ -113,17 +113,31 @@ def inject_user():
 def about():
 	return flask.render_template("about.html")
 
-@app.post("/change_password")
+@app.post("/password")
 def change_password():
 	username = flask.request.form.get("username")
 	password = flask.request.form.get("new-password")
 
-	if (get_user().update_password(username, password)):
+	if (get_user().update_password(password)):
 		flask.flash("Password successfully changed!")
 		return flask.redirect(flask.url_for("sign_out"))
 	else:
 		flask.flash("New password must be different.", category="error")
 		return flask.redirect(flask.url_for("settings"))
+
+@app.post("/posts/<int:post_id>/comment")
+def comment(post_id):
+	if (post := get_db().post_by_id(post_id)) is None:
+		return "That post doesn't exist.", 404
+
+	if "content" not in flask.request.form:
+		return "Please include content for the comment.", 400
+
+	user = get_user()
+
+	post.create_comment(None if user is None else user.id, flask.request.form["content"])
+
+	return flask.redirect(flask.url_for("index"))
 
 @app.route("/contact")
 def contact():
@@ -208,11 +222,17 @@ def image():
 
 @app.route("/")
 def index():
+	post_filter = flask.request.args.get("post_id", type=int)
 	posts = index_posts(
-		flask.request.args.get("post_id", type=int),
+		post_filter,
 		flask.request.args.get("filter"),
 		flask.request.args.get("sort")
 	)
+
+	if post_filter is not None and (post := get_db().post_by_id(post_filter)) is not None:
+		comments = [comment.serialize() for comment in post.comments()]
+	else:
+		comments = None
 
 	trending_posts = index_posts(None, None, "rising")
 
@@ -222,13 +242,16 @@ def index():
 		return flask.render_template(
 			"landing.html",
 			posts=posts,
+			comments=comments,
 			trending_posts=trending_posts,
-			tags=tags
+			tags=tags,
+			user=None
 		)
 
 	return flask.render_template(
 		"feed.html",
 		posts=posts,
+		comments=comments,
 		trending_posts=trending_posts,
 		tags=tags,
 		user=get_user().serialize()
@@ -288,6 +311,13 @@ def sign_up():
 @app.route("/thankyou")
 def thankyou():
 	return flask.render_template("thankyou.html")
+
+	if (get_user().update_password(username, password)):
+		flask.flash('Password successfully changed!')
+		return flask.redirect(flask.url_for('sign_out'))
+	else:
+		flask.flash("New password must be different.", category='error')
+		return flask.redirect(flask.url_for('settings'))
 
 @app.get("/posts/<int:post_id>/uppurr")
 def uppurr(post_id):
