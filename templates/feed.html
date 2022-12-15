@@ -49,65 +49,61 @@
 
 			<div class="feed-column me-3">
 				{% block post %}
+					<div class="card mb-3 shadow" id="container">
+						<div class="card-body" role="button">
+							<h5 class="card-title accordion mb-0 text-center">Create Post</h5>
 
-				<div class="card mb-3 shadow" id="container" >
-					<div class="card-body" role="button">
-						<h5 class="card-title accordion text-center">Create Post</h5>
-						<div class="panel" style="opacity: 0; display:none; transition: all 0.9s ease-in-out; transition-delay: 0.9s;">
-						<form
-							id="userPost"
-							class="card-text"
-							action="{{ url_for('create_post') }}"
-							method="post"
-							enctype="multipart/form-data">
-							{% for color in tags %}
-								<input type="checkbox"
-									id="{{ color }}-tag-input"
-									class="btn-check"
-									name="{{ color }}-tag"
-									autocomplete="off">
+							<div class="panel mt-2" style="display: none; opacity: 0; transition: all 0.9s ease-in-out; transition-delay: 0.9s;">
+								<form
+									id="create-post-form"
+									class="card-text"
+									action="{{ url_for('create_post') }}"
+									method="post"
+									enctype="multipart/form-data">
+									{% for color in tags %}
+										<input type="checkbox"
+											id="{{ color }}-tag-input"
+											class="btn-check"
+											name="{{ color }}-tag"
+											autocomplete="off">
 
-								<label
-									class="btn btn-outline-dark btn-sm mb-3"
-									for="{{ color }}-tag-input">{{ color.capitalize() }} Cats
-								</label>
-							{% endfor %}
+										<label
+											class="btn btn-outline-dark btn-sm mb-3"
+											for="{{ color }}-tag-input">{{ color.capitalize() }} Cats
+										</label>
+									{% endfor %}
 
-							<label class="d-block mb-2" for="title">Title</label>
-    						<input type="text"
-								id="title"
-								class="form-control mb-3"
-								name="title"
-								placeholder="Enter Title">
+									<label class="d-block mb-2" for="title">Title</label>
+									<input type="text"
+										id="title"
+										class="form-control mb-3"
+										name="title"
+										placeholder="Enter Title">
 
-							<div class="form-group">
-								<label class="mb-2" for="description">Description</label>
+									<div class="form-group">
+										<label class="mb-2" for="description">Description</label>
+										<textarea
+											id="description"
+											class="form-control mb-3"
+											name="description"
+											rows="3"></textarea>
+									</div>
 
-								<textarea
-									id="description"
-									class="form-control mb-3"
-									name="description"
-									rows="3"></textarea>
+									<label class="mb-2" for="picture">Cat Picture</label>
+									<div class="form-group">
+										<input type="file"
+											id="picture"
+											class="form-control"
+											name="picture"
+											accept=".png, .jpeg, .jpg">
+									</div>
+								</form>
 							</div>
+						</div>
 
-							<label class="mb-2" for="picture">Cat Picture</label>
-
-							<div class="form-group">
-								<input type="file"
-									id="picture"
-									class="form-control"
-									name="picture"
-									accept=".png, .jpeg, .jpg">
-							</div>
-						</form>
+						<input type="submit" form="create-post-form" class="submit btn btn-dark d-none rounded-0 rounded-bottom">
 					</div>
-				</div>
-				<input type="submit" form="userPost" class="submit btn btn-dark rounded-0 rounded-bottom" style="display: none;"/>
-
-				</div>
 				{% endblock %}
-
-
 
 				{% if posts|length > 0 %}
 					<div class="d-flex justify-content-center mb-3">
@@ -118,9 +114,7 @@
 								{{ ordering.capitalize() }}
 							</a>
 						{% endfor %}
-
 					</div>
-
 
 					<div class="card">
 						{% for post in posts %}
@@ -142,78 +136,102 @@
 												{{ tag|capitalize }} cat
 											</span>
 										{% endfor %}
-											<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
+
+										<i class="icon-togglable far fa-heart fs-1 ms-3 text-danger"></i>
+
+										{% if user is not none and post["user_id"] == user["id"] %}
+											<div class="dropdown ms-2">
+												<button type="button"
+													class="btn btn-secondary dropdown-toggle btn-warning"
+													data-bs-toggle="dropdown"
+													aria-expanded="false">More</button>
+
+												<form
+													action="{{ url_for('delete_post', post_id=post['id']) }}"
+													method="post">
+													<ul class="dropdown-menu text-bg-light">
+														<li>
+															<button type="submit"
+																class="btn btn-sm btn-danger dropdown-item">
+																Purr-ge!<img role='button' src="https://i.ibb.co/wM84Cnw/image.png" style="position: absolute; top: 18%; right: 30%;" width="30" height="30">
+															</button>
+														</li>
+													</ul>
+												</form>
+											</div>
+										{% endif %}
 									</div>
-									{%if post['username'] == user['username']%}
-						<div class="dropdown">
 
-							<button class="btn btn-secondary dropdown-toggle btn-warning" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-							  More
-							</button>
-							<form action="/posts/{{post['id']}}/delete" method="post">
-							<ul class="dropdown-menu text-bg-light" aria-labelledby="dropdownMenuButton1">
-							  <li>
-								<div class="d-flex">
-								  <button type="submit" class="btn btn-sm btn-danger dropdown-item">Purr-ge!<img role='button' src="https://i.ibb.co/wM84Cnw/image.png" style="position: absolute; top: 18%; right: 30%;" width='30' height="30" alt="Purge delete button"></button>
-
-								</div>
-							  </li>
-							</ul>
-						</form>
-						  </div>
-						  {% endif %}
 									<h5 class="fw-bold text-secondary">{{ post['catnip'] }} catnip</h5>
 								</div>
 							</div>
 
 							<img class="w-100" src="{{ post['image_url'] }}">
+
 							<div class="card-body">
-								<a href="{{ url_for('uppurr', post_id=post['id']) }}" style="text-decoration:none;">
-									<button
+								<a
 									class="btn btn-block"
-									data-bs-toggle="tooltip"
+									href="{{ url_for('uppurr', post_id=post['id']) }}"
+									title="Uppurr"
 									data-bs-placement="bottom"
-									title="Uppurr">
-									<input type="text" hidden value="1" name="upvote">
-									<i class="fa fa-paw"></i>
-								</button>
+									data-bs-toggle="tooltip">
+									<i class="uppurr fa fa-paw"></i>
 								</a>
 
 								<span class="text-center">{{ post['catnip'] }}</span>
 
-								<a href="{{ url_for('downpurr', post_id=post['id']) }}" style="text-decoration:none;">
-								<button
+								<a
 									class="btn btn-block"
-									data-bs-toggle="tooltip"
+									href="{{ url_for('downpurr', post_id=post['id']) }}"
+									title="Downpurr"
 									data-bs-placement="bottom"
-									title="Downpurr">
-
-									<input type="text" hidden value="1" name="downvote">
+									data-bs-toggle="tooltip">
 									<i class="downpurr fa fa-paw"></i>
-								</button>
 								</a>
 
-								<a href="{{ url_for(request.endpoint, post_id=post['id']) }}">
-								<button class="btn btn-block">
+								<a
+									class="btn btn-block"
+									href="{{ url_for(request.endpoint, post_id=post['id']) }}">
 									<i class="fa fa-commenting-o me-2" aria-hidden="true"></i>Comment
-								</button>
 								</a>
 
+								{% if comments is not none %}
+									<div class="form-group mt-3">
+										<form
+											action="{{ url_for('comment', post_id=post['id']) }}"
+											method="post">
+											<label class="mb-2" for="content">
+												Commenting as <span class="link-primary" role="button">{{ "Guest" if user is none else user["username"] }}</span>
+											</label>
 
-								{%block comment%} {%endblock%}
+											<textarea
+												id="content"
+												class="form-control mb-3"
+												name="content"
+												placeholder="Share your thoughts"
+												rows="3"></textarea>
 
-								{%for item in items%}
+											<div class="text-center">
+												<button type="submit"
+													class="btn btn-dark mb-2 rounded-0 rounded-pill">
+													Add Comment
+												</button>
+											</div>
 
+											{% for comment in comments %}
+												<div class="card mb-1 mt-2">
+													<div class="card-body ">
+														<h6 class="card-title">
+															By: <span class="link-primary">{{ comment["username"] }}</span>
+														</h6>
 
-								<div class="card mb-2 mt-2">
-									<div class="card-body ">
-										<h6 class="card-title">By: <span class="link-primary">{{item[1]}}</span></h6>
-										<p class="card-text">{{item[0]}}</p>
+														<p class="card-text">{{ comment["content"] }}</p>
+													</div>
+												</div>
+											{% endfor %}
+										</form>
 									</div>
-								</div>
-
-								{%endfor%}
-
+								{% endif %}
 							</div>
 						{% endfor %}
 					</div>

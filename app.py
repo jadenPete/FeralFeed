@@ -22,8 +22,6 @@ class CookieNames:
 
 app = flask.Flask(__name__)
 
-
-
 def populate_config():
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -127,6 +125,20 @@ def change_password():
 		flask.flash("New password must be different.", category="error")
 		return flask.redirect(flask.url_for("settings"))
 
+@app.post("/posts/<int:post_id>/comment")
+def comment(post_id):
+	if (post := get_db().post_by_id(post_id)) is None:
+		return "That post doesn't exist.", 404
+
+	if "content" not in flask.request.form:
+		return "Please include content for the comment.", 400
+
+	user = get_user()
+
+	post.create_comment(None if user is None else user.id, flask.request.form["content"])
+
+	return flask.redirect(flask.url_for("index"))
+
 @app.route("/contact")
 def contact():
 	return flask.render_template("contact.html")
@@ -190,7 +202,7 @@ def downpurr(post_id):
 	if (post := get_db().post_by_id(post_id)) is None:
 		return "That post doesn't exist.", 404
 
-	post[0].downpurr()
+	post.downpurr()
 
 	return flask.redirect(flask.url_for("index"))
 
@@ -210,11 +222,17 @@ def image():
 
 @app.route("/")
 def index():
+	post_filter = flask.request.args.get("post_id", type=int)
 	posts = index_posts(
-		flask.request.args.get("post_id", type=int),
+		post_filter,
 		flask.request.args.get("filter"),
 		flask.request.args.get("sort")
 	)
+
+	if post_filter is not None and (post := get_db().post_by_id(post_filter)) is not None:
+		comments = [comment.serialize() for comment in post.comments()]
+	else:
+		comments = None
 
 	trending_posts = index_posts(None, None, "rising")
 
@@ -224,13 +242,16 @@ def index():
 		return flask.render_template(
 			"landing.html",
 			posts=posts,
+			comments=comments,
 			trending_posts=trending_posts,
-			tags=tags
+			tags=tags,
+			user=None
 		)
 
 	return flask.render_template(
 		"feed.html",
 		posts=posts,
+		comments=comments,
 		trending_posts=trending_posts,
 		tags=tags,
 		user=get_user().serialize()
@@ -306,40 +327,3 @@ def uppurr(post_id):
 	post.uppurr()
 
 	return flask.redirect(flask.url_for("index"))
-
-@app.route("/posts/<int:post_id>/comments", methods=['GET', 'POST'])
-def comment(post_id):
-	comments = get_db().post_by_id(post_id)[0].comment_serialize()['comments']
-	user_list = get_db().post_by_id(post_id)[0].comment_serialize()['users']
-	name_list = [get_db().user_from_id(id).id for id in user_list]
-	comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
-
-	if flask.request.method == 'GET':
-		if (get_user() is None):
-				return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
-		items=comment_container, user_name='Guest')
-		return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
-	items=comment_container,
-	user_name=get_user().serialize()['username'])
-
-
-	if flask.request.method == 'POST':
-		if (get_user() is None):
-			flask.flash("You must login to comment", category='error')
-			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id(post_id)],
-	items=comment_container, user_name='Guest')
-		comment = flask.request.form.get('comment')
-		if not comment:
-			flask.flash("Comment is required", category='error')
-		else:
-			get_db().comments(get_user().id, post_id, comment, 10)
-			comments = get_db().post_by_id(post_id)[0].comment_serialize()['comments']
-			user_list = get_db().post_by_id(post_id)[0].comment_serialize()['users']
-			name_list = [get_db().user_from_id(id).id for id in user_list]
-			comment_container = [(comments[i], name_list[i]) for i in range(len(user_list))]
-
-			return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])],
-	items=comment_container,
-	user_name=get_user().serialize()['username'])
-
-	return flask.render_template("comments.html", posts=[post.serialize() for post in get_db().post_by_id([post_id])])

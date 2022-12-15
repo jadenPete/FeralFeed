@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS post_tags (
 			"""
 CREATE TABLE IF NOT EXISTS comments (
 	id SERIAL PRIMARY KEY,
-	user_id INTEGER NOT NULL REFERENCES users,
+	user_id INTEGER REFERENCES users,
 	post_id INTEGER NOT NULL REFERENCES posts,
 	content TEXT NOT NULL,
 	catnip INTEGER NOT NULL DEFAULT 0
@@ -117,17 +117,6 @@ INSERT INTO posts
 
 		return DatabasePost(self, post_id)
 
-	def comments(self, user_id, post_id, content, catnip):
-		self.cur.execute(
-			"""
-INSERT INTO comments
-	(user_id, post_id, content, catnip)
-	VALUES (%s, %s, %s, %s) RETURNING id;""", (user_id, post_id, content, catnip)
-		)
-
-
-		return DatabaseComments(self, post_id)
-
 	def create_user(self, username, password):
 		try:
 			self.cur.execute(
@@ -149,12 +138,12 @@ INSERT INTO comments
 			return bytes(row[0]), row[1]
 
 	def post_by_id(self, id_):
-		self.cur.execute("SELECT id FROM posts WHERE id = %s ORDER BY timestamp DESC;", (id_,))
+		self.cur.execute("SELECT FROM posts WHERE id = %s;", (id_,))
 
 		if self.cur.rowcount == 0:
 			return
 
-		return [DatabasePost(self, row[0]) for row in self.cur.fetchall()]
+		return DatabasePost(self, id_)
 
 	def posts(self):
 		self.cur.execute("SELECT id FROM posts ORDER BY timestamp DESC;")
@@ -178,12 +167,44 @@ INSERT INTO comments
 		self.cur.execute("SELECT user_id FROM tokens WHERE uuid = %s;", (token,))
 
 		if self.cur.rowcount > 0:
-			return DatabaseUser(self, self.cur.fetchall()[0])
+			return DatabaseUser(self, self.cur.fetchone()[0])
+
+class DatabaseComment:
+	def __init__(self, db, id_):
+		self.db: Database = db
+		self.id = id_
+
+	def serialize(self):
+		self.db.cur.execute("SELECT user_id, content FROM comments WHERE id = %s;", (self.id,))
+
+		user_id, content = self.db.cur.fetchone()
+
+		return {
+			"username": "Guest" \
+				if user_id is None \
+				else DatabaseUser(self.db, user_id).serialize()["username"],
+
+			"content": content
+		}
 
 class DatabasePost:
 	def __init__(self, db, id_):
 		self.db: Database = db
 		self.id = id_
+
+	def comments(self):
+		self.db.cur.execute("SELECT id FROM comments WHERE post_id = %s;", (self.id,))
+
+		return [DatabaseComment(self.db, row[0]) for row in self.db.cur.fetchall()]
+
+	def create_comment(self, user_id, content):
+		self.db.cur.execute(
+			"""
+INSERT INTO comments (user_id, post_id, content, catnip)
+	VALUES (%s, %s, %s, 0)
+	RETURNING id;""", (user_id, self.id, content))
+
+		return DatabaseComment(self.db, self.db.cur.fetchone()[0])
 
 	def downpurr(self):
 		self.db.cur.execute("UPDATE posts SET catnip = catnip - 1 WHERE id = %s;", (self.id,))
@@ -191,14 +212,12 @@ class DatabasePost:
 	def serialize(self):
 		self.db.cur.execute(
 			"""
-SELECT username, title, body, confidence, catnip, timestamp, image_id
+SELECT posts.user_id, username, title, body, confidence, catnip, timestamp, image_id
 	FROM posts
 	JOIN users ON user_id = users.id
 	JOIN images ON image_id = images.id
 	WHERE posts.id = %s;""", (self.id,)
 		)
-
-		
 
 		post_row = self.db.cur.fetchone()
 
@@ -207,55 +226,19 @@ SELECT username, title, body, confidence, catnip, timestamp, image_id
 		tag_rows = self.db.cur.fetchall()
 
 		return {
-			"username": post_row[0],
-			"title": post_row[1],
-			"body": post_row[2],
+			"user_id": post_row[0],
+			"username": post_row[1],
+			"title": post_row[2],
+			"body": post_row[3],
 			"tags": [row[0] for row in tag_rows],
-			"catnip": round(post_row[3] * post_row[4]),
-			"timestamp": post_row[5],
-			"image_url": flask.url_for("image", id=post_row[6]),
+			"catnip": round(post_row[4] * post_row[5]),
+			"timestamp": post_row[6],
+			"image_url": flask.url_for("image", id=post_row[7]),
 			"id": self.id
-		}
-
-	def comment_serialize(self):
-		self.db.cur.execute(
-			"""
-SELECT comments.user_id, post_id, content
-	FROM comments
-	JOIN posts ON post_id = posts.id
-	WHERE posts.id = %s;""", (self.id,)
-		)
-
-		rows = self.db.cur.fetchall()
-
-		return {
-			"comments": [row[2] for row in rows],
-			"users": [row[0] for row in rows]
 		}
 
 	def uppurr(self):
 		self.db.cur.execute("UPDATE posts SET catnip = catnip + 1 WHERE id = %s;", (self.id,))
-class DatabaseComments:
-	def __init__(self, db, id_):
-		self.db: Database= db
-		self.id = id_
-
-	
-
-
-
-
-class DatabaseComments:
-	def __init__(self, db, id_):
-		self.db:Database= db
-		self.id = id_
-
-
-
-
-
-
-
 
 class DatabaseUser:
 	def __init__(self, db, id_):
@@ -282,11 +265,17 @@ INSERT INTO tokens
 		self.db.cur.execute("DELETE FROM tokens WHERE user_id = %s;", (self.id,))
 
 	def remove_post(self, post_id):
+		self.db.cur.execute("SELECT user_id FROM posts WHERE id = %s;", (post_id,))
 
-		self.db.cur.execute("DELETE FROM post_tags WHERE post_id = %s", (post_id,))
+		if self.db.cur.rowcount == 0:
+			return
+
+		if self.db.cur.fetchone()[0] != self.id:
+			return False
+
 		self.db.cur.execute("DELETE FROM comments WHERE post_id = %s;", (post_id,))
+		self.db.cur.execute("DELETE FROM post_tags WHERE post_id = %s", (post_id,))
 		self.db.cur.execute("DELETE FROM posts WHERE id = %s;", (post_id,))
-		
 
 		return True
 
@@ -294,6 +283,7 @@ INSERT INTO tokens
 		self.db.cur.execute("SELECT username FROM users WHERE id = %s", (self.id,))
 
 		return {
+			"id": self.id,
 			"username" : self.db.cur.fetchone()[0]
 		}
 
@@ -301,6 +291,7 @@ INSERT INTO tokens
 		self.db.cur.execute(
 			"UPDATE users SET password = %s WHERE id = %s", (self.db.ph.hash(password), self.id)
 		)
+
 		return True
 
 	def verify_password(self, password):
